@@ -21,15 +21,12 @@ import (
 	"image/color"
 	"log"
 
-	"io/ioutil"
-
-	// "fmt"&
-
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/images"
+
+	"TheTrail/engine"
 )
 
 const (
@@ -82,15 +79,9 @@ type Game struct {
 	jump bool
 	airborne bool
 
-	tilemap Tilemap
+	tilemap *engine.Tilemap
 
 	animator *Animator
-}
-
-type Tilemap struct {
-	tileset *ebiten.Image
-
-	tiles []int
 }
 
 type Animation struct {
@@ -181,9 +172,9 @@ func (g *Game) init() {
 
 	g.dood = MultiSprite{
 		sprites: []*ebiten.Image{
-			loadImage("./assets/dood/boots_one.png"),
-			loadImage("./assets/dood/torso_three.png"),
-			loadImage("./assets/dood/head_two.png"),
+			engine.LoadImage("./assets/dood/boots_one.png"),
+			engine.LoadImage("./assets/dood/torso_three.png"),
+			engine.LoadImage("./assets/dood/head_two.png"),
 		},
 		rect: image.Rect(0, 0, 32, 32),
 		x: 0,
@@ -226,45 +217,7 @@ func (g *Game) init() {
 		current: "idle",
 	}
 
-	g.tilemap = Tilemap{
-		tileset: tileset,
-		tiles: []int{
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,2,-1,-1,-1,-1,-1,-1,-1,-1,0,1,1,1,1,1,1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,8,-1,-1,-1,-1,-1,-1,-1,-1,6,3,4,4,4,4,4,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,8,-1,-1,-1,-1,-1,-1,-1,-1,6,9,7,7,7,7,7,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,8,-1,-1,-1,-1,-1,-1,-1,-1,6,9,7,7,7,7,7,
-			0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,18,19,1,1,1,1,1,1,1,1,18,9,7,7,7,7,7,
-			6,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,24,7,7,7,7,7,
-			6,9,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-		},
-	}
-}
-
-func (tilemap Tilemap) Draw(screen *ebiten.Image) {
-	for i, tile := range tilemap.tiles {
-		if tile != -1 {
-			op := &ebiten.DrawImageOptions{}
-			sx, sy := (tile % 6 * 8), tile / 6 * 8
-			op.GeoM.Translate(float64(i % 40) * 8, float64(i / 40) * 8)
-			screen.DrawImage(tilemap.tileset.SubImage(image.Rect(sx, sy, sx+8, sy+8)).(*ebiten.Image), op)
-		}
-	}
+	g.tilemap = engine.NewTilemap("./assets/map.csv", "./assets/tileset.png")
 }
 
 func (g *Game) Update() error {
@@ -272,6 +225,7 @@ func (g *Game) Update() error {
 		g.init()
 	}
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
+	// g.jump = false;
 
 	g.animator.Update(&g.dood)
 	return nil
@@ -395,20 +349,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
-func loadImage(path string) *ebiten.Image {
-	content, error := ioutil.ReadFile(path)
-	if error != nil {
-		log.Fatal(error)
-	}
-
-	img, _, err := image.Decode(bytes.NewReader(content))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return ebiten.NewImageFromImage(img)
-}
-
 func main() {
 	// Decode an image from the image file's byte slice.
 	img, _, err := image.Decode(bytes.NewReader(images.Runner_png))
@@ -417,13 +357,11 @@ func main() {
 	}
 	runnerImage = ebiten.NewImageFromImage(img)
 
-	tileset = loadImage("./assets/tileset.png")
+	tileset = engine.LoadImage("./assets/tileset.png")
 
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Animation (Ebitengine Demo)")
-	var a = &Game{}
-	a.init()
-	if err := ebiten.RunGame(a); err != nil {
+	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
 	}
 }

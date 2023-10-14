@@ -1,4 +1,4 @@
-module github.com/yourname/yourgame
+module TheTrail
 
 go 1.21.3
 
