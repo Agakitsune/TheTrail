@@ -53,8 +53,19 @@ type Rectangle struct {
 	y float32
 	w float32
 	h float32
+}
 
-	color color.RGBA
+type MultiSprite struct {
+	sprites []*ebiten.Image
+
+	rect image.Rectangle
+
+	x float64
+	y float64
+	velx float64
+	vely float64
+
+	flip bool
 }
 
 type Game struct {
@@ -62,18 +73,18 @@ type Game struct {
 
 	inited bool
 
-	x float64
-	y float64
-	velx float64
-	vely float64
+	dood MultiSprite
 
 	keys []ebiten.Key
 
 	rects []Rectangle
 
 	jump bool
+	airborne bool
 
 	tilemap Tilemap
+
+	animator *Animator
 }
 
 type Tilemap struct {
@@ -82,20 +93,136 @@ type Tilemap struct {
 	tiles []int
 }
 
-func (r Rectangle) Draw(screen *ebiten.Image) {
-	vector.DrawFilledRect(screen, r.x, r.y, r.w, r.h, r.color, false)
+type Animation struct {
+	frames []int
+	row int
+
+	loopOn int
+
+	selection int
+	speed int
+
+	count int
+}
+
+type Animator struct {
+	animations map[string]*Animation
+
+	current string
+}
+
+func (this *Animation) GetFrame(frame int) int {
+	return this.frames[frame]
+}
+
+func (this *Animation) Update(sprite *MultiSprite) {
+	this.count++
+
+	if this.count % this.speed != 0 {
+		return
+	}
+	this.selection++
+
+	if this.selection >= len(this.frames) {
+		this.selection = this.loopOn
+	}
+
+	frame := this.GetFrame(this.selection)
+	sprite.rect = image.Rect(frame * 32, this.row * 32, frame * 32 + 32, this.row * 32 + 32)
+}
+
+func (this *Animator) SetAnimation(name string) {
+	if this.current == name {
+		return
+	}
+	var anim = this.animations[this.current]
+	anim.selection = 0
+	this.current = name
+	anim = this.animations[this.current]
+	anim.selection = 0
+}
+
+func (this *Animator) Update(sprite *MultiSprite) {
+	var anim = this.animations[this.current]
+	anim.Update(sprite)
+}
+
+func (this MultiSprite) Draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+
+	if this.flip {
+		op.GeoM.Scale(-1, 1)
+		op.GeoM.Translate(32, 0)
+	}
+
+	op.GeoM.Translate(this.x, this.y)
+
+	// flip it
+	
+
+	for _, sprite := range this.sprites {
+		screen.DrawImage(sprite.SubImage(this.rect).(*ebiten.Image), op)
+	}
+}
+
+func (r Rectangle) Draw(screen *ebiten.Image, color color.RGBA) {
+	vector.DrawFilledRect(screen, r.x, r.y, r.w, r.h, color, false)
 }
 
 func (g *Game) init() {
 	g.rects = []Rectangle{
-		Rectangle{0, 20 * 8, 40 * 8, 3 * 8, color.RGBA{255, 255, 255, 255}},
-		Rectangle{33 * 8, 16 * 8, 7 * 8, 4 * 8, color.RGBA{255, 255, 255, 255}},
-		// Rectangle{200, 220 - 50, 50, 50, color.RGBA{255, 255, 255, 255}},
-		// Rectangle{100, 220 - 100, 50, 20, color.RGBA{255, 255, 255, 255}},
-		// Rectangle{250, 0, 70, 240, color.RGBA{255, 255, 255, 255}},
+		Rectangle{0, 20 * 8, 40 * 8, 3 * 8},
+		Rectangle{33 * 8, 16 * 8, 7 * 8, 4 * 8},
 	}
 	g.inited = true
 	g.jump = false;
+
+	g.dood = MultiSprite{
+		sprites: []*ebiten.Image{
+			loadImage("./assets/dood/boots_one.png"),
+			loadImage("./assets/dood/torso_three.png"),
+			loadImage("./assets/dood/head_two.png"),
+		},
+		rect: image.Rect(0, 0, 32, 32),
+		x: 0,
+		y: 0,
+		velx: 0,
+		vely: 0,
+	}
+
+	g.animator = &Animator{
+		animations: map[string]*Animation{
+			"idle": &Animation{
+				frames: []int{0, 1, 2, 3, 4, 5},
+				row: 0,
+				loopOn: 0,
+				selection: 0,
+				speed: 10,
+			},
+			"walk": &Animation{
+				frames: []int{0, 1, 2, 3, 4, 5, 6},
+				row: 1,
+				loopOn: 1,
+				selection: 0,
+				speed: 10,
+			},
+			"run": &Animation{
+				frames: []int{0, 1, 2, 3, 4, 5},
+				row: 2,
+				loopOn: 0,
+				selection: 0,
+				speed: 10,
+			},
+			"jump": &Animation{
+				frames: []int{0, 1, 2},
+				row: 3,
+				loopOn: 2,
+				selection: 0,
+				speed: 5,
+			},
+		},
+		current: "idle",
+	}
 
 	g.tilemap = Tilemap{
 		tileset: tileset,
@@ -144,106 +271,140 @@ func (g *Game) Update() error {
 	}
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 
-	g.count++
+	g.animator.Update(&g.dood)
 	return nil
 }
 
 func (g *Game) collide(boxes []Rectangle) {
 	for _, b := range boxes {
-		if (g.vely != 0) {
-			// println("velx: ", fmt.Sprintf("%f", g.velx))
-			// println("gx: ", fmt.Sprintf("%f", g.x))
+		if (g.dood.vely != 0) {
+			// println("velx: ", fmt.Sprintf("%f", g.dood.velx))
+			// println("gx: ", fmt.Sprintf("%f", g.dood.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x + b.w))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.x + 16 + g.velx)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.x - 16 + g.velx)))
-			if ((g.x + 16 + g.velx) <= float64(b.x) || (g.x - 16 + g.velx) >= float64(b.x + b.w)) {
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.x + 32 + g.dood.velx)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.x - 32 + g.dood.velx)))
+			if ((g.dood.x + 32 + g.dood.velx) <= float64(b.x) || (g.dood.x - 32 + g.dood.velx) >= float64(b.x + b.w)) {
 				continue
 			}
-			// println("vely: ", fmt.Sprintf("%f", g.vely))
-			// println("gy: ", fmt.Sprintf("%f", g.y))
+			// println("vely: ", fmt.Sprintf("%f", g.dood.vely))
+			// println("gy: ", fmt.Sprintf("%f", g.dood.y))
 			// println("by: ", fmt.Sprintf("%f", b.y))
 			// println("by + bh: ", fmt.Sprintf("%f",b.y + b.h))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.y + 16 + g.vely)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.y - 16 + g.vely)))
-			if ((g.y + 16 + g.vely) >= float64(b.y) && (g.y - 16 + g.vely) <= float64(b.y + b.h)) {
-				if g.vely > 0 {
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.y + 32 + g.dood.vely)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.y - 32 + g.dood.vely)))
+			if ((g.dood.y + 32 + g.dood.vely) >= float64(b.y) && (g.dood.y - 32 + g.dood.vely) <= float64(b.y + b.h)) {
+				if g.dood.vely > 0 {
 					g.jump = false
+					g.airborne = false
 				}
-				g.vely = 0
-				b.color = color.RGBA{255, 255, 0, 255}
+				g.dood.vely = 0
 			}
 		}
-		if (g.velx != 0) {
-			// println("vely: ", fmt.Sprintf("%f", g.vely))
-			// println("gy: ", fmt.Sprintf("%f", g.y))
+		if (g.dood.velx != 0) {
+			// println("vely: ", fmt.Sprintf("%f", g.dood.vely))
+			// println("gy: ", fmt.Sprintf("%f", g.dood.y))
 			// println("by: ", fmt.Sprintf("%f", b.y))
 			// println("by + bh: ", fmt.Sprintf("%f",b.y + b.h))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.y + 16 + g.vely)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.y - 16 + g.vely)))
-			if ((g.y + 16 + g.vely) <= float64(b.y) || (g.y - 16 + g.vely) >= float64(b.y + b.h)) {
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.y + 32 + g.dood.vely)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.y - 32 + g.dood.vely)))
+			if ((g.dood.y + 32 + g.dood.vely) <= float64(b.y) || (g.dood.y - 32 + g.dood.vely) >= float64(b.y + b.h)) {
 				continue
 			}
-			// println("velx: ", fmt.Sprintf("%f", g.velx))
-			// println("gx: ", fmt.Sprintf("%f", g.x))
+			// println("velx: ", fmt.Sprintf("%f", g.dood.velx))
+			// println("gx: ", fmt.Sprintf("%f", g.dood.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x + b.w))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.x + 16 + g.velx)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.x - 16 + g.velx)))
-			if ((g.x + 16 + g.velx) >= float64(b.x) && (g.x - 16 + g.velx) <= float64(b.x + b.w)) {
-				g.velx = 0
-				b.color = color.RGBA{255, 255, 0, 255}
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.x + 32 + g.dood.velx)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.x - 32 + g.dood.velx)))
+			if ((g.dood.x + 32 + g.dood.velx) >= float64(b.x) && (g.dood.x - 32 + g.dood.velx) <= float64(b.x + b.w)) {
+				g.dood.velx = 0
 			}
 		}
 	}
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(frameWidth)/2, -float64(frameHeight)/2)
-	op.GeoM.Translate(g.x, g.y)
-	i := (g.count / 5) % frameCount
-	sx, sy := frameOX+i*frameWidth, frameOY
-	screen.DrawImage(runnerImage.SubImage(image.Rect(sx, sy, sx+frameWidth, sy+frameHeight)).(*ebiten.Image), op)
+	// op := &ebiten.DrawImageOptions{}
+	// op.GeoM.Translate(-float64(frameWidth)/2, -float64(frameHeight)/2)
+	// op.GeoM.Translate(g.dood.x, g.dood.y)
+	// i := (g.count / 5) % frameCount
+	// sx, sy := frameOX+i*frameWidth, frameOY
+	// screen.DrawImage(runnerImage.SubImage(image.Rect(sx, sy, sx+frameWidth, sy+frameHeight)).(*ebiten.Image), op)
+
+	g.dood.Draw(screen)
 
 	moveX := false
+	run := true
 
-	g.vely += 0.1
+	g.dood.vely += 0.1
 
+	vel := 0.5
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		vel = 0.2
+		run = false
+	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-		g.velx = 1
+		g.dood.velx = vel
+		g.dood.flip = false
+		if !g.airborne {
+			if run {
+				g.animator.SetAnimation("run")
+			} else {
+				g.animator.SetAnimation("walk")
+			}
+		}
 		moveX = true
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-		g.velx = -1
+		g.dood.velx = -vel
+		g.dood.flip = true
+		if !g.airborne {
+			if run {
+				g.animator.SetAnimation("run")
+			} else {
+				g.animator.SetAnimation("walk")
+			}
+		}
 		moveX = true
 	}
 	if ebiten.IsKeyPressed(ebiten.KeySpace) && !g.jump {
-		g.vely = -3.5
+		g.animator.SetAnimation("jump")
+		g.dood.vely = -3
 		g.jump = true
+		g.airborne = true
 	}
 	if !moveX {
-		g.velx = 0
-	}
-
-	for _, b := range g.rects {
-		b.color = color.RGBA{255, 255, 255, 255}
+		if !g.airborne {
+			g.animator.SetAnimation("idle")
+		}
+		g.dood.velx = 0
 	}
 
 	g.collide(g.rects)
 
-	g.x += g.velx
-	g.y += g.vely
+	g.dood.x += g.dood.velx
+	g.dood.y += g.dood.vely
 
 	g.tilemap.Draw(screen)
-
-	// for _, b := range g.rects {
-	// 	b.Draw(screen)
-	// }
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
+}
+
+func loadImage(path string) *ebiten.Image {
+	content, error := ioutil.ReadFile(path)
+	if error != nil {
+		log.Fatal(error)
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(content))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return ebiten.NewImageFromImage(img)
 }
 
 func main() {
@@ -254,17 +415,7 @@ func main() {
 	}
 	runnerImage = ebiten.NewImageFromImage(img)
 
-	content, error := ioutil.ReadFile("./assets/tileset.png")
-	if error != nil {
-		log.Fatal(error)
-	}
-
-	img, _, err = image.Decode(bytes.NewReader(content))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tileset = ebiten.NewImageFromImage(img)
+	tileset = loadImage("./assets/tileset.png")
 
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Animation (Ebitengine Demo)")
