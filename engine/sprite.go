@@ -11,23 +11,23 @@ type MultiSprite struct {
 
 	rect image.Rectangle
 
-	x float64
-	y float64
-	velx float64
-	vely float64
+	X float64
+	Y float64
+	Velx float64
+	Vely float64
 
-	flip bool
+	Flip bool
 }
 
 func (this MultiSprite) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 
-	if this.flip {
+	if this.Flip {
 		op.GeoM.Scale(-1, 1)
 		op.GeoM.Translate(32, 0)
 	}
 
-	op.GeoM.Translate(this.x, this.y)
+	op.GeoM.Translate(this.X, this.Y)
 
 	// flip it
 	

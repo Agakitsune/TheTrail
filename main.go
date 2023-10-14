@@ -14,8 +14,7 @@ import (
 )
 
 func main() {
-	engine.LoadGaYme()
-	var state engine.State = &states.WorldMapState{}
+	var state engine.State = &states.PlayState{}
 	var game = engine.CreateGame(state)
 
 	ebiten.SetWindowSize(engine.ScreenWidth*2, engine.ScreenHeight*2)

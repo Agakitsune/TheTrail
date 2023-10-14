@@ -15,13 +15,14 @@ func (s *WorldMapState) Load(g *engine.Game) {
 	fmt.Println("WorldMapState Load")
 }
 
-func (s *WorldMapState) Update() {
+func (s *WorldMapState) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		fmt.Println("WorldMapState Update")
 		s.game.SetState(&PlayState{})
 	}
+	return nil;
 }
 
-func (s *WorldMapState) Draw() {
+func (s *WorldMapState) Draw(screen *ebiten.Image) {
 	// fmt.Println("WorldMapState Draw")
 }
