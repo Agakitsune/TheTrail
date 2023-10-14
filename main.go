@@ -23,7 +23,7 @@ import (
 
 	"io/ioutil"
 
-	// "fmt"
+	// "fmt"&
 
 	"github.com/hajimehoshi/ebiten/v2"
 	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -173,6 +173,8 @@ func (g *Game) init() {
 	g.rects = []Rectangle{
 		Rectangle{0, 20 * 8, 40 * 8, 3 * 8},
 		Rectangle{33 * 8, 16 * 8, 7 * 8, 4 * 8},
+		Rectangle{23 * 8, 16 * 8, 2 * 8, 4 * 8},
+		Rectangle{28 * 8, 14 * 8, 2 * 8, 2 * 8},
 	}
 	g.inited = true
 	g.jump = false;
@@ -241,13 +243,13 @@ func (g *Game) init() {
 			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,1,1,1,1,1,1,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,3,4,4,4,4,4,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,9,7,7,7,7,7,
-			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,9,7,7,7,7,7,
-			0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,18,9,7,7,7,7,7,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,2,-1,-1,-1,-1,-1,-1,-1,-1,0,1,1,1,1,1,1,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,8,-1,-1,-1,-1,-1,-1,-1,-1,6,3,4,4,4,4,4,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,8,-1,-1,-1,-1,-1,-1,-1,-1,6,9,7,7,7,7,7,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,8,-1,-1,-1,-1,-1,-1,-1,-1,6,9,7,7,7,7,7,
+			0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,18,19,1,1,1,1,1,1,1,1,18,9,7,7,7,7,7,
 			6,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,24,7,7,7,7,7,
 			6,9,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
 		},
@@ -284,7 +286,7 @@ func (g *Game) collide(boxes []Rectangle) {
 			// println("bx: ", fmt.Sprintf("%f", b.x + b.w))
 			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.x + 32 + g.dood.velx)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.x - 32 + g.dood.velx)))
-			if ((g.dood.x + 32 + g.dood.velx) <= float64(b.x) || (g.dood.x - 32 + g.dood.velx) >= float64(b.x + b.w)) {
+			if ((g.dood.x + 22 + g.dood.velx) <= float64(b.x) || (g.dood.x + 11 + g.dood.velx) >= float64(b.x + b.w)) {
 				continue
 			}
 			// println("vely: ", fmt.Sprintf("%f", g.dood.vely))
@@ -293,7 +295,7 @@ func (g *Game) collide(boxes []Rectangle) {
 			// println("by + bh: ", fmt.Sprintf("%f",b.y + b.h))
 			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.y + 32 + g.dood.vely)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.y - 32 + g.dood.vely)))
-			if ((g.dood.y + 32 + g.dood.vely) >= float64(b.y) && (g.dood.y - 32 + g.dood.vely) <= float64(b.y + b.h)) {
+			if ((g.dood.y + 32 + g.dood.vely) >= float64(b.y) && (g.dood.y + 7 + g.dood.vely) <= float64(b.y + b.h)) {
 				if g.dood.vely > 0 {
 					g.jump = false
 					g.airborne = false
@@ -308,7 +310,7 @@ func (g *Game) collide(boxes []Rectangle) {
 			// println("by + bh: ", fmt.Sprintf("%f",b.y + b.h))
 			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.y + 32 + g.dood.vely)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.y - 32 + g.dood.vely)))
-			if ((g.dood.y + 32 + g.dood.vely) <= float64(b.y) || (g.dood.y - 32 + g.dood.vely) >= float64(b.y + b.h)) {
+			if ((g.dood.y + 32 + g.dood.vely) <= float64(b.y) || (g.dood.y + 7 + g.dood.vely) >= float64(b.y + b.h)) {
 				continue
 			}
 			// println("velx: ", fmt.Sprintf("%f", g.dood.velx))
@@ -317,7 +319,7 @@ func (g *Game) collide(boxes []Rectangle) {
 			// println("bx: ", fmt.Sprintf("%f", b.x + b.w))
 			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.x + 32 + g.dood.velx)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.x - 32 + g.dood.velx)))
-			if ((g.dood.x + 32 + g.dood.velx) >= float64(b.x) && (g.dood.x - 32 + g.dood.velx) <= float64(b.x + b.w)) {
+			if ((g.dood.x + 22 + g.dood.velx) >= float64(b.x) && (g.dood.x + 11 + g.dood.velx) <= float64(b.x + b.w)) {
 				g.dood.velx = 0
 			}
 		}
@@ -419,7 +421,9 @@ func main() {
 
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Animation (Ebitengine Demo)")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	var a = &Game{}
+	a.init()
+	if err := ebiten.RunGame(a); err != nil {
 		log.Fatal(err)
 	}
 }
