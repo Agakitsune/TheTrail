@@ -88,7 +88,8 @@ func (r Rectangle) Draw(screen *ebiten.Image) {
 
 func (g *Game) init() {
 	g.rects = []Rectangle{
-		Rectangle{0, 180 - 24, 320, 24, color.RGBA{255, 255, 255, 255}},
+		Rectangle{0, 20 * 8, 40 * 8, 3 * 8, color.RGBA{255, 255, 255, 255}},
+		Rectangle{33 * 8, 16 * 8, 7 * 8, 4 * 8, color.RGBA{255, 255, 255, 255}},
 		// Rectangle{200, 220 - 50, 50, 50, color.RGBA{255, 255, 255, 255}},
 		// Rectangle{100, 220 - 100, 50, 20, color.RGBA{255, 255, 255, 255}},
 		// Rectangle{250, 0, 70, 240, color.RGBA{255, 255, 255, 255}},
