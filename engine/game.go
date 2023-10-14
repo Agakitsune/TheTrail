@@ -61,8 +61,6 @@ type Rectangle struct {
 	y float32
 	w float32
 	h float32
-
-	color color.RGBA
 }
 
 type Game struct {
@@ -70,30 +68,23 @@ type Game struct {
 
 	inited bool
 
-	x    float64
-	y    float64
-	velx float64
-	vely float64
+	dood MultiSprite
 
 	keys []ebiten.Key
 
 	rects []Rectangle
 
 	jump bool
+	airborne bool
 
-	tilemap Tilemap
+	tilemap *Tilemap
+	animator *Animator
 
 	state State
 }
 
-type Tilemap struct {
-	tileset *ebiten.Image
-
-	tiles []int
-}
-
-func (r Rectangle) Draw(screen *ebiten.Image) {
-	vector.DrawFilledRect(screen, r.x, r.y, r.w, r.h, r.color, false)
+func (r Rectangle) Draw(screen *ebiten.Image, color color.RGBA) {
+	vector.DrawFilledRect(screen, r.x, r.y, r.w, r.h, color, false)
 }
 
 func (g *Game) SetState(state State) {
@@ -102,60 +93,66 @@ func (g *Game) SetState(state State) {
 }
 
 func (g *Game) Init() {
-	g.inited = true
-	// Rects
 	g.rects = []Rectangle{
-		Rectangle{0, 20 * 8, 40 * 8, 3 * 8, color.RGBA{255, 255, 255, 255}},
-		Rectangle{33 * 8, 16 * 8, 7 * 8, 4 * 8, color.RGBA{255, 255, 255, 255}},
-		// Rectangle{200, 220 - 50, 50, 50, color.RGBA{255, 255, 255, 255}},
-		// Rectangle{100, 220 - 100, 50, 20, color.RGBA{255, 255, 255, 255}},
-		// Rectangle{250, 0, 70, 240, color.RGBA{255, 255, 255, 255}},
+		Rectangle{0, 20 * 8, 40 * 8, 3 * 8},
+		Rectangle{33 * 8, 16 * 8, 7 * 8, 4 * 8},
+		Rectangle{23 * 8, 16 * 8, 2 * 8, 4 * 8},
+		Rectangle{28 * 8, 14 * 8, 2 * 8, 2 * 8},
 	}
 	g.inited = true
-	g.jump = false
+	g.jump = false;
 
-	g.tilemap = Tilemap{
-		tileset: tileset,
-		tiles: []int{
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 6, 3, 4, 4, 4, 4, 4,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 6, 9, 7, 7, 7, 7, 7,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 6, 9, 7, 7, 7, 7, 7,
-			0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 9, 7, 7, 7, 7, 7,
-			6, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 24, 7, 7, 7, 7, 7,
-			6, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+	g.dood = MultiSprite{
+		sprites: []*ebiten.Image{
+			LoadImage("./assets/dood/boots_one.png"),
+			LoadImage("./assets/dood/torso_three.png"),
+			LoadImage("./assets/dood/head_two.png"),
 		},
+		rect: image.Rect(0, 0, 32, 32),
+		x: 0,
+		y: 0,
+		velx: 0,
+		vely: 0,
 	}
+
+	g.animator = &Animator{
+		animations: map[string]*Animation{
+			"idle": &Animation{
+				frames: []int{0, 1, 2, 3, 4, 5},
+				row: 0,
+				loopOn: 0,
+				selection: 0,
+				speed: 10,
+			},
+			"walk": &Animation{
+				frames: []int{0, 1, 2, 3, 4, 5, 6},
+				row: 1,
+				loopOn: 1,
+				selection: 0,
+				speed: 10,
+			},
+			"run": &Animation{
+				frames: []int{0, 1, 2, 3, 4, 5},
+				row: 2,
+				loopOn: 0,
+				selection: 0,
+				speed: 10,
+			},
+			"jump": &Animation{
+				frames: []int{0, 1, 2},
+				row: 3,
+				loopOn: 2,
+				selection: 0,
+				speed: 5,
+			},
+		},
+		current: "idle",
+	}
+
+	g.tilemap = NewTilemap("./assets/map.csv", "./assets/tileset.png")
 
 	// Initialize the state
 	g.state = nil
-}
-
-func (tilemap Tilemap) Draw(screen *ebiten.Image) {
-	for i, tile := range tilemap.tiles {
-		if tile != -1 {
-			op := &ebiten.DrawImageOptions{}
-			sx, sy := (tile % 6 * 8), tile/6*8
-			op.GeoM.Translate(float64(i%40)*8, float64(i/40)*8)
-			screen.DrawImage(tilemap.tileset.SubImage(image.Rect(sx, sy, sx+8, sy+8)).(*ebiten.Image), op)
-		}
-	}
 }
 
 func (g *Game) Update() error {
@@ -165,6 +162,7 @@ func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 	g.count++
 
+	g.animator.Update(&g.dood)
 	if g.state != nil {
 		g.state.Update()
 	}
@@ -173,100 +171,109 @@ func (g *Game) Update() error {
 
 func (g *Game) collide(boxes []Rectangle) {
 	for _, b := range boxes {
-		if g.vely != 0 {
-			// println("velx: ", fmt.Sprintf("%f", g.velx))
-			// println("gx: ", fmt.Sprintf("%f", g.x))
+		if (g.dood.vely != 0) {
+			// println("velx: ", fmt.Sprintf("%f", g.dood.velx))
+			// println("gx: ", fmt.Sprintf("%f", g.dood.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x + b.w))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.x + 16 + g.velx)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.x - 16 + g.velx)))
-			if (g.x+16+g.velx) <= float64(b.x) || (g.x-16+g.velx) >= float64(b.x+b.w) {
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.x + 32 + g.dood.velx)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.x - 32 + g.dood.velx)))
+			if ((g.dood.x + 22 + g.dood.velx) <= float64(b.x) || (g.dood.x + 11 + g.dood.velx) >= float64(b.x + b.w)) {
 				continue
 			}
-			// println("vely: ", fmt.Sprintf("%f", g.vely))
-			// println("gy: ", fmt.Sprintf("%f", g.y))
+			// println("vely: ", fmt.Sprintf("%f", g.dood.vely))
+			// println("gy: ", fmt.Sprintf("%f", g.dood.y))
 			// println("by: ", fmt.Sprintf("%f", b.y))
 			// println("by + bh: ", fmt.Sprintf("%f",b.y + b.h))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.y + 16 + g.vely)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.y - 16 + g.vely)))
-			if (g.y+16+g.vely) >= float64(b.y) && (g.y-16+g.vely) <= float64(b.y+b.h) {
-				if g.vely > 0 {
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.y + 32 + g.dood.vely)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.y - 32 + g.dood.vely)))
+			if ((g.dood.y + 32 + g.dood.vely) >= float64(b.y) && (g.dood.y + 7 + g.dood.vely) <= float64(b.y + b.h)) {
+				if g.dood.vely > 0 {
 					g.jump = false
+					g.airborne = false
 				}
-				g.vely = 0
-				b.color = color.RGBA{255, 255, 0, 255}
+				g.dood.vely = 0
 			}
 		}
-		if g.velx != 0 {
-			// println("vely: ", fmt.Sprintf("%f", g.vely))
-			// println("gy: ", fmt.Sprintf("%f", g.y))
+		if (g.dood.velx != 0) {
+			// println("vely: ", fmt.Sprintf("%f", g.dood.vely))
+			// println("gy: ", fmt.Sprintf("%f", g.dood.y))
 			// println("by: ", fmt.Sprintf("%f", b.y))
 			// println("by + bh: ", fmt.Sprintf("%f",b.y + b.h))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.y + 16 + g.vely)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.y - 16 + g.vely)))
-			if (g.y+16+g.vely) <= float64(b.y) || (g.y-16+g.vely) >= float64(b.y+b.h) {
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.y + 32 + g.dood.vely)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.y - 32 + g.dood.vely)))
+			if ((g.dood.y + 32 + g.dood.vely) <= float64(b.y) || (g.dood.y + 7 + g.dood.vely) >= float64(b.y + b.h)) {
 				continue
 			}
-			// println("velx: ", fmt.Sprintf("%f", g.velx))
-			// println("gx: ", fmt.Sprintf("%f", g.x))
+			// println("velx: ", fmt.Sprintf("%f", g.dood.velx))
+			// println("gx: ", fmt.Sprintf("%f", g.dood.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x))
 			// println("bx: ", fmt.Sprintf("%f", b.x + b.w))
-			// println("estimateMin: ", fmt.Sprintf("%f", (g.x + 16 + g.velx)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (g.x - 16 + g.velx)))
-			if (g.x+16+g.velx) >= float64(b.x) && (g.x-16+g.velx) <= float64(b.x+b.w) {
-				g.velx = 0
-				b.color = color.RGBA{255, 255, 0, 255}
+			// println("estimateMin: ", fmt.Sprintf("%f", (g.dood.x + 32 + g.dood.velx)))
+			// println("estimateMax: ", fmt.Sprintf("%f", (g.dood.x - 32 + g.dood.velx)))
+			if ((g.dood.x + 22 + g.dood.velx) >= float64(b.x) && (g.dood.x + 11 + g.dood.velx) <= float64(b.x + b.w)) {
+				g.dood.velx = 0
 			}
 		}
 	}
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(frameWidth)/2, -float64(frameHeight)/2)
-	op.GeoM.Translate(g.x, g.y)
-	i := (g.count / 5) % frameCount
-	sx, sy := frameOX+i*frameWidth, frameOY
-	screen.DrawImage(runnerImage.SubImage(image.Rect(sx, sy, sx+frameWidth, sy+frameHeight)).(*ebiten.Image), op)
+	g.dood.Draw(screen)
 
 	moveX := false
+	run := true
 
-	g.vely += 0.1
+	g.dood.vely += 0.1
 
+	vel := 0.5
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		vel = 0.2
+		run = false
+	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-		g.velx = 1
+		g.dood.velx = vel
+		g.dood.flip = false
+		if !g.airborne {
+			if run {
+				g.animator.SetAnimation("run")
+			} else {
+				g.animator.SetAnimation("walk")
+			}
+		}
 		moveX = true
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-		g.velx = -1
+		g.dood.velx = -vel
+		g.dood.flip = true
+		if !g.airborne {
+			if run {
+				g.animator.SetAnimation("run")
+			} else {
+				g.animator.SetAnimation("walk")
+			}
+		}
 		moveX = true
 	}
 	if ebiten.IsKeyPressed(ebiten.KeySpace) && !g.jump {
-		g.vely = -3.5
+		g.animator.SetAnimation("jump")
+		g.dood.vely = -3
 		g.jump = true
+		g.airborne = true
 	}
 	if !moveX {
-		g.velx = 0
-	}
-
-	for _, b := range g.rects {
-		b.color = color.RGBA{255, 255, 255, 255}
+		if !g.airborne {
+			g.animator.SetAnimation("idle")
+		}
+		g.dood.velx = 0
 	}
 
 	g.collide(g.rects)
 
-	g.x += g.velx
-	g.y += g.vely
+	g.dood.x += g.dood.velx
+	g.dood.y += g.dood.vely
 
 	g.tilemap.Draw(screen)
-
-	if g.state != nil {
-		g.state.Draw()
-	}
-
-	// for _, b := range g.rects {
-	// 	b.Draw(screen)
-	// }
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
