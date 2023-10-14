@@ -173,7 +173,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func CreateGame(state State) *Game {
 	var game = &Game{}
-	game.Init()
+	// game.Init()
 	game.SetState(state)
 
 	return game
