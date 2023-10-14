@@ -3,10 +3,10 @@ package states
 import (
 	"TheTrail/engine"
 
-	"fmt"
+	// "fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type PlayState struct {
@@ -16,6 +16,7 @@ type PlayState struct {
 func (s *PlayState) Load(g *engine.Game) {
 	s.game = g
 	s.game.Init()
+	engine.NewColliderMap("./assets/collide.csv")
 }
 
 func (s *PlayState) Update() error {
@@ -68,7 +69,7 @@ func (s *PlayState) Update() error {
 		s.game.Dood.Velx = 0
 	}
 
-	s.game.Collide(s.game.Rects)
+	s.game.Collide(s.game.Collider.Boxes)
 
 	s.game.Dood.X += s.game.Dood.Velx
 	s.game.Dood.Y += s.game.Dood.Vely
@@ -79,6 +80,6 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	s.game.Tilemap.Draw(screen)
 	s.game.Dood.Draw(screen)
 
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()))
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS()), 0, 20)
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()))
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS()), 0, 20)
 }

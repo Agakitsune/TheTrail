@@ -50,7 +50,7 @@ func (self *Tilemap) Draw(screen *ebiten.Image) {
     for i, tile := range self.tiles {
 		if tile != -1 {
 			op := &ebiten.DrawImageOptions{}
-			sx, sy := (tile % 6 * 8), tile / 6 * 8
+			sx, sy := ((tile & 7) * 8), (tile >> 3) * 8
 			op.GeoM.Translate(float64(i % 40) * 8, float64(i / 40) * 8)
 			screen.DrawImage(self.tileset.SubImage(image.Rect(sx, sy, sx+8, sy+8)).(*ebiten.Image), op)
 		}

@@ -17,17 +17,10 @@ const (
 	frameCount  = 8
 )
 
-type Rectangle struct {
-	X float32
-	Y float32
-	W float32
-	H float32
-}
-
 type Game struct {
 	Dood MultiSprite
 
-	Rects []Rectangle
+	Collider* Collider
 
 	Jump bool
 	Airborne bool
@@ -44,12 +37,7 @@ func (g *Game) SetState(state State) {
 }
 
 func (g *Game) Init() {
-	g.Rects = []Rectangle{
-		Rectangle{0, 20 * 8, 40 * 8, 3 * 8},
-		Rectangle{33 * 8, 16 * 8, 7 * 8, 4 * 8},
-		Rectangle{23 * 8, 16 * 8, 2 * 8, 4 * 8},
-		Rectangle{28 * 8, 14 * 8, 2 * 8, 2 * 8},
-	}
+	g.Collider = NewColliderMap("./assets/collide.csv")
 	g.Jump = false;
 
 	g.Dood = MultiSprite{
@@ -111,19 +99,19 @@ func (this *Game) Collide(boxes []Rectangle) {
 			// println("velx: ", fmt.Sprintf("%f", this.Dood.Velx))
 			// println("gx: ", fmt.Sprintf("%f", this.Dood.X))
 			// println("bx: ", fmt.Sprintf("%f", b.X))
-			// println("bx: ", fmt.Sprintf("%f", b.X + b.W))
+			// println("bx: ", fmt.Sprintf("%f", b.X + b.Width))
 			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.X + 32 + this.Dood.Velx)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.X - 32 + this.Dood.Velx)))
-			if ((this.Dood.X + 22 + this.Dood.Velx) <= float64(b.X) || (this.Dood.X + 11 + this.Dood.Velx) >= float64(b.X + b.W)) {
+			if ((this.Dood.X + 22 + this.Dood.Velx) <= float64(b.X) || (this.Dood.X + 11 + this.Dood.Velx) >= float64(b.X + b.Width)) {
 				continue
 			}
 			// println("vely: ", fmt.Sprintf("%f", this.Dood.Vely))
 			// println("gy: ", fmt.Sprintf("%f", this.Dood.Y))
 			// println("by: ", fmt.Sprintf("%f", b.Y))
-			// println("by + bh: ", fmt.Sprintf("%f",b.Y + b.H))
+			// println("by + bh: ", fmt.Sprintf("%f",b.Y + b.Height))
 			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.Y + 32 + this.Dood.Vely)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.Y - 32 + this.Dood.Vely)))
-			if ((this.Dood.Y + 32 + this.Dood.Vely) >= float64(b.Y) && (this.Dood.Y + 7 + this.Dood.Vely) <= float64(b.Y + b.H)) {
+			if ((this.Dood.Y + 32 + this.Dood.Vely) >= float64(b.Y) && (this.Dood.Y + 7 + this.Dood.Vely) <= float64(b.Y + b.Height)) {
 				if this.Dood.Vely > 0 {
 					this.Jump = false
 					this.Airborne = false
@@ -135,19 +123,19 @@ func (this *Game) Collide(boxes []Rectangle) {
 			// println("vely: ", fmt.Sprintf("%f", this.Dood.Vely))
 			// println("gy: ", fmt.Sprintf("%f", this.Dood.Y))
 			// println("by: ", fmt.Sprintf("%f", b.Y))
-			// println("by + bh: ", fmt.Sprintf("%f",b.Y + b.H))
+			// println("by + bh: ", fmt.Sprintf("%f",b.Y + b.Height))
 			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.Y + 32 + this.Dood.Vely)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.Y - 32 + this.Dood.Vely)))
-			if ((this.Dood.Y + 32 + this.Dood.Vely) <= float64(b.Y) || (this.Dood.Y + 7 + this.Dood.Vely) >= float64(b.Y + b.H)) {
+			if ((this.Dood.Y + 32 + this.Dood.Vely) <= float64(b.Y) || (this.Dood.Y + 7 + this.Dood.Vely) >= float64(b.Y + b.Height)) {
 				continue
 			}
 			// println("velx: ", fmt.Sprintf("%f", this.Dood.Velx))
 			// println("gx: ", fmt.Sprintf("%f", this.Dood.X))
 			// println("bx: ", fmt.Sprintf("%f", b.X))
-			// println("bx: ", fmt.Sprintf("%f", b.X + b.W))
+			// println("bx: ", fmt.Sprintf("%f", b.X + b.Width))
 			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.X + 32 + this.Dood.Velx)))
 			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.X - 32 + this.Dood.Velx)))
-			if ((this.Dood.X + 22 + this.Dood.Velx) >= float64(b.X) && (this.Dood.X + 11 + this.Dood.Velx) <= float64(b.X + b.W)) {
+			if ((this.Dood.X + 22 + this.Dood.Velx) >= float64(b.X) && (this.Dood.X + 11 + this.Dood.Velx) <= float64(b.X + b.Width)) {
 				this.Dood.Velx = 0
 			}
 		}
