@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"image"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+
 )
 
 type EditorState struct {
@@ -32,7 +34,7 @@ type EditorState struct {
     func (s *EditorState) Load(g *engine.Game) {
         s.game = g
 
-        s.currentChoice = 1
+        s.currentChoice = 0
         s.heads = []*ebiten.Image{
             engine.LoadImage("./assets/dood/head_one.png"),
             engine.LoadImage("./assets/dood/head_two.png"),
@@ -68,6 +70,20 @@ type EditorState struct {
         if ebiten.IsKeyPressed(ebiten.KeyA) {
             fmt.Println("EditorState Update")
             s.game.SetState(&PlayState{})
+        }
+        if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+            if (s.currentChoice == 0) {
+                s.currentChoice = 2
+            } else {
+                s.currentChoice--
+            }
+        }
+        if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+            if (s.currentChoice == 2) {
+                s.currentChoice = 0
+            } else {
+                s.currentChoice++
+            }
         }
         return nil;
     }
