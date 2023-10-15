@@ -66,10 +66,8 @@ func (s *PlayState) Load(gm *engine.Game) {
 	file.Close()
 
 	// Play musik
-	var g = s
-
-	if g.audioContext == nil {
-		g.audioContext = audio.NewContext(sampleRate)
+	if s.audioContext == nil {
+		s.audioContext = audio.NewContext(sampleRate)
 	}
 
 	// Decode an Ogg file.
@@ -83,13 +81,13 @@ func (s *PlayState) Load(gm *engine.Game) {
 	// s is still an io.ReadCloser and io.Seeker.
 	stream := audio.NewInfiniteLoopWithIntro(oggS, introLengthInSecond*bytesPerSample*sampleRate, loopLengthInSecond*bytesPerSample*sampleRate)
 
-	g.player, err = g.audioContext.NewPlayer(stream)
+	s.player, err = s.audioContext.NewPlayer(stream)
 	if err != nil {
 		panic(err)
 	}
 
 	// Play the infinite-length stream. This never ends.
-	g.player.Play()
+	s.player.Play()
 }
 
 func (s *PlayState) Update() error {
