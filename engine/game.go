@@ -143,16 +143,73 @@ func (this *Game) Collide(boxes []Rectangle) {
 }
 
 func (g *Game) Update() error {
-	if g.state != nil {
-		return g.state.Update()
+
+	g.Animator.Update(&g.Dood)
+
+	moveX := false
+	run := true
+
+	g.Dood.Vely += 0.1
+
+	vel := 0.5
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		vel = 0.2
+		run = false
 	}
+	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+		g.Dood.Velx = vel
+		g.Dood.Flip = false
+		if !g.Airborne {
+			if run {
+				g.Animator.SetAnimation("run")
+			} else {
+				g.Animator.SetAnimation("walk")
+			}
+		}
+		moveX = true
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+		g.Dood.Velx = -vel
+		g.Dood.Flip = true
+		if !g.Airborne {
+			if run {
+				g.Animator.SetAnimation("run")
+			} else {
+				g.Animator.SetAnimation("walk")
+			}
+		}
+		moveX = true
+	}
+	if ebiten.IsKeyPressed(ebiten.KeySpace) && !g.Jump {
+		g.Animator.SetAnimation("jump")
+		g.Dood.Vely = -3
+		g.Jump = true
+		g.Airborne = true
+	}
+	if !moveX {
+		if !g.Airborne {
+			g.Animator.SetAnimation("idle")
+		}
+		g.Dood.Velx = 0
+	}
+
+	g.Collide(g.Collider.Boxes)
+
+	g.Dood.X += g.Dood.Velx
+	g.Dood.Y += g.Dood.Vely
+
+	// if g.state != nil {
+	// 	return g.state.Update()
+	// }
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	if g.state != nil {
-		g.state.Draw(screen)
-	}
+	g.Tilemap.Draw(screen)
+	g.Dood.Draw(screen)
+	// if g.state != nil {
+	// 	g.state.Draw(screen)
+	// }
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -161,8 +218,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func CreateGame(state State) *Game {
 	var game = &Game{}
-	// game.Init()
-	game.SetState(state)
+	game.Init()
+	// game.SetState(state)
 
 	return game
 }
