@@ -1,93 +1,28 @@
 package states
 
 import (
-	"TheTrail/engine"
-
-	"bufio"
-	"bytes"
 	"fmt"
-	"io"
-	"log"
-	"os"
+
+	"TheTrail/engine"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	camera "github.com/melonfunction/ebiten-camera"
 
-	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	// raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 )
 
-const (
-	screenWidth    = 640
-	screenHeight   = 480
-	sampleRate     = 48000
-	bytesPerSample = 4 // 2 channels * 2 bytes (16 bit)
-
-	introLengthInSecond = 0
-	loopLengthInSecond  = 72
-)
-
 type PlayState struct {
-	game         *engine.Game
-	player       *audio.Player
-	audioContext *audio.Context
-	rawMusicData []byte
+	game		*engine.Game
+	music 	  	*engine.Audio
 }
 
 func (s *PlayState) Load(gm *engine.Game) {
 	s.game = gm
 	s.game.Init()
-
-	file, err := os.Open("assets/EpitechGameJam-_In_Game.ogg")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Get the file size
-	stat, err := file.Stat()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// Read the file into a byte slice
-	bs := make([]byte, stat.Size())
-	_, err = bufio.NewReader(file).Read(bs)
-	if err != nil && err != io.EOF {
-		fmt.Println(err)
-		return
-	}
-
-	s.rawMusicData = bs
-
-	file.Close()
-
-	// Play musik
-	if s.audioContext == nil {
-		s.audioContext = audio.NewContext(sampleRate)
-	}
-
-	// Decode an Ogg file.
-	// oggS is a decoded io.ReadCloser and io.Seeker.
-	oggS, err := vorbis.DecodeWithoutResampling(bytes.NewReader(s.rawMusicData))
-	if err != nil {
-		panic(err)
-	}
-
-	// Create an infinite loop stream from the decoded bytes.
-	// s is still an io.ReadCloser and io.Seeker.
-	stream := audio.NewInfiniteLoopWithIntro(oggS, introLengthInSecond*bytesPerSample*sampleRate, loopLengthInSecond*bytesPerSample*sampleRate)
-
-	s.player, err = s.audioContext.NewPlayer(stream)
-	if err != nil {
-		panic(err)
-	}
-
-	// Play the infinite-length stream. This never ends.
-	s.player.Play()
+	s.music = engine.CreateAudio("assets/EpitechGameJam-_In_Game.ogg")
+	s.music.Play()
 }
 
 func (s *PlayState) Update() error {
