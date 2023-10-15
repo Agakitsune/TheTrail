@@ -12,10 +12,14 @@ require (
 	github.com/EngoEngine/gl v1.0.14 // indirect
 	github.com/EngoEngine/math v1.0.4 // indirect
 	github.com/Noofbiz/sdlMojaveFix v0.0.1 // indirect
+	github.com/ebitengine/oto/v3 v3.1.0 // indirect
 	github.com/ebitengine/purego v0.5.0 // indirect
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220806181222-55e207c401ad // indirect
+	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
 	github.com/jezek/xgb v1.1.0 // indirect
+	github.com/jfreymuth/oggvorbis v1.0.5 // indirect
+	github.com/jfreymuth/vorbis v1.0.2 // indirect
 	github.com/melonfunction/ebiten-camera v0.0.0-20220812153034-695003d18a6d // indirect
 	github.com/veandco/go-sdl2 v0.4.25 // indirect
 	github.com/vulkan-go/glfw v0.0.0-20210402172934-58379a80228d // indirect

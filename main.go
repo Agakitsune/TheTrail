@@ -6,7 +6,6 @@ import (
 
 	"TheTrail/engine"
 	"TheTrail/states"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

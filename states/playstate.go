@@ -3,22 +3,67 @@ package states
 import (
 	"TheTrail/engine"
 
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
+	"log"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	camera "github.com/melonfunction/ebiten-camera"
+
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
+	// raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
+)
+
+const (
+	screenWidth    = 640
+	screenHeight   = 480
+	sampleRate     = 48000
+	bytesPerSample = 4 // 2 channels * 2 bytes (16 bit)
+
+	introLengthInSecond = 0
+	loopLengthInSecond  = 72
 )
 
 type PlayState struct {
-	game *engine.Game
+	game         *engine.Game
+	player       *audio.Player
+	audioContext *audio.Context
+	rawMusicData []byte
 }
 
 func (s *PlayState) Load(g *engine.Game) {
 	s.game = g
 	s.game.Init()
-	// engine.NewColliderMap("./assets/collide.csv")
+
+	file, err := os.Open("assets/EpitechGameJam-_In_Game.ogg")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Get the file size
+	stat, err := file.Stat()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Read the file into a byte slice
+	bs := make([]byte, stat.Size())
+	_, err = bufio.NewReader(file).Read(bs)
+	if err != nil && err != io.EOF {
+		fmt.Println(err)
+		return
+	}
+
+	s.rawMusicData = bs
+
+	file.Close()
 }
 
 func (s *PlayState) Update() error {
@@ -107,6 +152,36 @@ func (s *PlayState) Update() error {
 
 	s.game.Dood.X += s.game.Dood.Velx
 	s.game.Dood.Y += s.game.Dood.Vely
+
+	// Play musik
+	var g = s
+	if g.player != nil {
+		return nil
+	}
+
+	if g.audioContext == nil {
+		g.audioContext = audio.NewContext(sampleRate)
+	}
+
+	// Decode an Ogg file.
+	// oggS is a decoded io.ReadCloser and io.Seeker.
+	oggS, err := vorbis.DecodeWithoutResampling(bytes.NewReader(s.rawMusicData))
+	if err != nil {
+		return err
+	}
+
+	// Create an infinite loop stream from the decoded bytes.
+	// s is still an io.ReadCloser and io.Seeker.
+	stream := audio.NewInfiniteLoopWithIntro(oggS, introLengthInSecond*bytesPerSample*sampleRate, loopLengthInSecond*bytesPerSample*sampleRate)
+
+	g.player, err = g.audioContext.NewPlayer(stream)
+	if err != nil {
+		return err
+	}
+
+	// Play the infinite-length stream. This never ends.
+	g.player.Play()
+
 	return nil
 }
 
