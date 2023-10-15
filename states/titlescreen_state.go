@@ -33,7 +33,7 @@ type TitleScreenState struct {
 }
 
 func (s *TitleScreenState) Load(g *engine.Game) {
-	s.image = engine.LoadImage("./assets/back_langevin.png")
+	s.image = engine.LoadImage("./assets/back_volcan.png")
 	s.game = g
 
 	tt, err := opentype.Parse(fonts.PressStart2P_ttf)
@@ -59,29 +59,19 @@ func (s *TitleScreenState) Load(g *engine.Game) {
 }
 
 func (s *TitleScreenState) Update() error {
-	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		fmt.Println("TitleScreenState Update")
 		s.game.SetState(&EditorState{})
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		fmt.Println("you just pressed a Enter key")
-
-		fmt.Println("PLAY FADE INTO CHARACTER EDITOR")
 		character_edit = true
-
 	}
 	return nil
 }
 
 func (s *TitleScreenState) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{135, 206, 235, 0xff})
-
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(0.33, 0.27)
+	op.GeoM.Scale(0.05, 0.06)
 
 	screen.DrawImage(s.image, op)
-	// vector.DrawFilledRect(screen, 80, 10, 160, 25, color.Black, false)
-
 	if character_edit == false {
 		vector.DrawFilledRect(screen, 80, 10, 160, 25, color.RGBA{189, 195, 199, 255}, false)
 	}
@@ -96,15 +86,16 @@ func (s *TitleScreenState) Draw(screen *ebiten.Image) {
 	if character_edit == false {
 		for i, l := range titleTexts {
 			x := (engine.ScreenWidth - len(l)*titleFontSize) / 2
-			// x := 50
 			text.Draw(screen, l, titleArcadeFont, x, (i+2)*titleFontSize, color.Black)
 		}
+
+		// draw character walking here
+		// HERE
+
 		for i, l := range texts {
-			// x := (engine.ScreenHeight - len(l)*fontSize) / 2
 			x := 60
-			text.Draw(screen, l, arcadeFont, x, (i+12)*fontSize, color.White)
+			text.Draw(screen, l, arcadeFont, x, (i+16)*fontSize, color.White)
 		}
 	}
 
-	// fmt.Println("TitleScreenState Draw")
 }
