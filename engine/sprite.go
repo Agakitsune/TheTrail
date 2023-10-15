@@ -22,6 +22,7 @@ type MultiSprite struct {
 	Vely float64
 
 	Flip bool
+	Walling bool
 }
 
 func NewSprite(

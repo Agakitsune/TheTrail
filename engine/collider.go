@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"fmt"
+	// "fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -147,22 +147,28 @@ func NewColliderMap(path string, x, y int) *Collider {
 
 func (this *Collider) Update(game *Game, dood* MultiSprite) {
 	for _, b := range this.Boxes {
+		// println("\nX: ", fmt.Sprintf("%f", dood.X))
+		// println("Y: ", fmt.Sprintf("%f\n", dood.Y))
+		
 		if (dood.Vely != 0) {
-			println("velx: ", fmt.Sprintf("%f", dood.Velx))
-			println("gx: ", fmt.Sprintf("%f", dood.X))
-			println("bx: ", fmt.Sprintf("%f", b.Rect.X))
-			println("bx: ", fmt.Sprintf("%f", b.Rect.X + b.Rect.Width))
-			println("estimateMin: ", fmt.Sprintf("%f", (dood.X + 32 + dood.Velx)))
-			println("estimateMax: ", fmt.Sprintf("%f", (dood.X - 32 + dood.Velx)))
+			// println("velx: ", fmt.Sprintf("%f", dood.Velx))
+			// println("gx: ", fmt.Sprintf("%f", dood.X))
+			// println("bx: ", fmt.Sprintf("%f", float64(b.Rect.X)))
+			// println("bx: ", fmt.Sprintf("%f", float64(b.Rect.X + b.Rect.Width)))
+			// println("gx + 22 + vel: ", fmt.Sprintf("%f", (dood.X + 22 + dood.Velx)))
+			// println("gx + 11 + vel: ", fmt.Sprintf("%f", (dood.X + 11 + dood.Velx)))
 			if ((dood.X + 22 + dood.Velx) <= float64(b.Rect.X + this.X) || (dood.X + 11 + dood.Velx) >= float64(b.Rect.X + b.Rect.Width + this.X)) {
 				continue
 			}
-			println("vely: ", fmt.Sprintf("%f", dood.Vely))
-			println("gy: ", fmt.Sprintf("%f", dood.Y))
-			println("by: ", fmt.Sprintf("%f", b.Rect.Y))
-			println("by + bh: ", fmt.Sprintf("%f",b.Rect.Y + b.Rect.Height))
-			println("estimateMin: ", fmt.Sprintf("%f", (dood.Y + 32 + dood.Vely)))
-			println("estimateMax: ", fmt.Sprintf("%f", (dood.Y - 32 + dood.Vely)))
+			// if ((dood.Y + 32) < float64(b.Rect.Y + this.Y) || (dood.Y + 7) > float64(b.Rect.Y + b.Rect.Height + this.Y)) {
+			// 	continue
+			// }
+			// println("vely: ", fmt.Sprintf("%f", dood.Vely))
+			// println("gy: ", fmt.Sprintf("%f", dood.Y))
+			// println("by: ", fmt.Sprintf("%f", float64(b.Rect.Y)))
+			// println("by + bh: ", fmt.Sprintf("%f", float64(b.Rect.Y + b.Rect.Height)))
+			// println("gx + 32 + vel: ", fmt.Sprintf("%f", (dood.Y + 32 + dood.Vely)))
+			// println("gx + 7 + vel: ", fmt.Sprintf("%f", (dood.Y + 7 + dood.Vely)))
 			if ((dood.Y + 32 + dood.Vely) >= float64(b.Rect.Y + this.Y) && (dood.Y + 7 + dood.Vely) <= float64(b.Rect.Y + b.Rect.Height + this.Y)) {
 				if b.Type == Death {
 					println("YOU ARE DED, NOT BIG SURPRISE")
@@ -181,6 +187,7 @@ func (this *Collider) Update(game *Game, dood* MultiSprite) {
 				dood.Vely = 0
 			}
 		}
+
 		if (dood.Velx != 0) {
 			// println("vely: ", fmt.Sprintf("%f", dood.Vely))
 			// println("gy: ", fmt.Sprintf("%f", dood.Y))
@@ -217,6 +224,8 @@ func (this *Collider) Update(game *Game, dood* MultiSprite) {
 				dood.Velx = 0
 			}
 		}
+
+		
 	}
 }
 
