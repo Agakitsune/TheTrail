@@ -59,9 +59,9 @@ func (s *TitleScreenState) Load(g *engine.Game) {
 }
 
 func (s *TitleScreenState) Update() error {
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
 		fmt.Println("TitleScreenState Update")
-		s.game.SetState(&PlayState{})
+		s.game.SetState(&EditorState{})
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		fmt.Println("you just pressed a Enter key")
@@ -69,7 +69,6 @@ func (s *TitleScreenState) Update() error {
 		fmt.Println("PLAY FADE INTO CHARACTER EDITOR")
 		character_edit = true
 
-		
 	}
 	return nil
 }
