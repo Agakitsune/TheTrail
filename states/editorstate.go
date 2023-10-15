@@ -10,6 +10,8 @@ import (
 type EditorState struct {
 	game *engine.Game
 
+    currentChoice int
+
 	heads []*ebiten.Image
     indexH int
 
@@ -22,13 +24,15 @@ type EditorState struct {
     arrow *ebiten.Image
 
     arrowRectL image.Rectangle
-        arrowRectR image.Rectangle
-
-    }
+    arrowRectR image.Rectangle
+    disableArrowRectL image.Rectangle
+    disableArrowRectR image.Rectangle
+}
 
     func (s *EditorState) Load(g *engine.Game) {
         s.game = g
 
+        s.currentChoice = 1
         s.heads = []*ebiten.Image{
             engine.LoadImage("./assets/dood/head_one.png"),
             engine.LoadImage("./assets/dood/head_two.png"),
@@ -54,6 +58,9 @@ type EditorState struct {
 
         s.arrowRectL = image.Rect(40, 0, 80, 40)
         s.arrowRectR = image.Rect(0, 0, 40, 40)
+
+        s.disableArrowRectL = image.Rect(40, 40, 80, 80)
+        s.disableArrowRectR = image.Rect(0, 40, 40, 80)
         fmt.Println("EditorState Load")
     }
 
@@ -80,7 +87,11 @@ type EditorState struct {
             op.GeoM.Translate(35, float64(100 + 95 * i))
             scalingFactorArrowL := 0.4
             op.GeoM.Scale(scalingFactorArrowL, scalingFactorArrowL)
-            screen.DrawImage(ebiten.NewImageFromImage(s.arrow.SubImage(s.arrowRectL)), op)
+            if (s.currentChoice == i) {
+                screen.DrawImage(ebiten.NewImageFromImage(s.arrow.SubImage(s.arrowRectL)), op)
+            } else {
+                screen.DrawImage(ebiten.NewImageFromImage(s.arrow.SubImage(s.disableArrowRectL)), op)
+            }
             op.GeoM.Reset()
         }
 
@@ -88,7 +99,11 @@ type EditorState struct {
             scalingFactorArrowR := 0.4
             op.GeoM.Translate(250, float64(100 + 95 * i))
             op.GeoM.Scale(scalingFactorArrowR, scalingFactorArrowR)
-            screen.DrawImage(ebiten.NewImageFromImage(s.arrow.SubImage(s.arrowRectR)), op)
+            if (s.currentChoice == i) {
+                screen.DrawImage(ebiten.NewImageFromImage(s.arrow.SubImage(s.arrowRectR)), op)
+            } else {
+                screen.DrawImage(ebiten.NewImageFromImage(s.arrow.SubImage(s.disableArrowRectR)), op)
+            }
             op.GeoM.Reset()
         }
 
