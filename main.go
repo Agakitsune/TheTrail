@@ -14,7 +14,8 @@ import (
 )
 
 func main() {
-	var state engine.State = &states.EditorState{}
+	var state engine.State = &states.TitleScreenState{}
+
 	var game = engine.CreateGame(state)
 
 	ebiten.SetWindowSize(engine.ScreenWidth*2, engine.ScreenHeight*2)
