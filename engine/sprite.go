@@ -4,6 +4,8 @@ import(
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
+
+	camera "github.com/melonfunction/ebiten-camera"
 )
 
 type MultiSprite struct {
@@ -11,6 +13,9 @@ type MultiSprite struct {
 
 	rect image.Rectangle
 
+	Jump bool
+	Airborne bool
+		
 	X float64
 	Y float64
 	Velx float64
@@ -19,7 +24,23 @@ type MultiSprite struct {
 	Flip bool
 }
 
-func (this MultiSprite) Draw(screen *ebiten.Image) {
+func NewSprite(
+	head, torso, boot string, rect image.Rectangle,
+)* MultiSprite {
+	var sprite* MultiSprite = new(MultiSprite)
+
+	sprite.sprites = []*ebiten.Image{
+		LoadImage(head),
+		LoadImage(torso),
+		LoadImage(boot),
+	}
+
+	sprite.rect = rect
+
+	return sprite
+}
+
+func (this MultiSprite) Draw(screen *ebiten.Image, camera* camera.Camera) {
 	op := &ebiten.DrawImageOptions{}
 
 	if this.Flip {
@@ -28,6 +49,7 @@ func (this MultiSprite) Draw(screen *ebiten.Image) {
 	}
 
 	op.GeoM.Translate(this.X, this.Y)
+	op = camera.GetTranslation(op, 0, 0)
 
 	// flip it
 	
