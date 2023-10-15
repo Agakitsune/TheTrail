@@ -41,7 +41,7 @@ func (g *Game) SetState(state State) {
 }
 
 func (g *Game) Init() {
-	g.Collider = NewColliderMap("./assets/collide.csv")
+	g.Collider = NewColliderMap("./assets/new_collision.csv")
 	g.Jump = false
 
 	g.Cam = camera.NewCamera(320, 180, 0, 0, 0, 1)
@@ -95,7 +95,7 @@ func (g *Game) Init() {
 
 	g.Animator.SetFrameSize(32, 32)
 
-	g.Tilemap = NewTilemap("./assets/map.csv", "./assets/tileset.png")
+	g.Tilemap = NewTilemap("./assets/new_draw.csv", "./assets/grass.png")
 
 	// Initialize the state
 	// g.state = nil

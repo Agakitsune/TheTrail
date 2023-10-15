@@ -3,8 +3,14 @@ package states
 import (
 	"TheTrail/engine"
 	"fmt"
+	
+	"golang.org/x/image/font"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	
 	"image"
 	"image/color"
 )
@@ -17,12 +23,20 @@ type WorldMapState struct {
 	mapFlag       engine.MultiSprite
 	flagAnimator  *engine.Animator
 	flagPositions []engine.Vector2
-	selectedFlag  int
+	
 	texts         []string
+
+	dogica font.Face
+
+	selectedFlag  int
+	selector *ebiten.Image
 }
 
 func (s *WorldMapState) Load(g *engine.Game) {
 	fmt.Println("WorldMapState Load")
+
+	s.dogica = engine.LoadFont("./assets/fonts/dogica.ttf", 8)
+	s.dogica = text.FaceWithLineHeight(s.dogica, 10)
 
 	s.game = g
 
@@ -50,6 +64,8 @@ func (s *WorldMapState) Load(g *engine.Game) {
 		Vely: 0,
 	}
 	s.reunion.X = 90
+
+	s.selector = engine.LoadImage("./assets/selector.png")
 
 	// Animator
 	s.animator = &engine.Animator{
@@ -101,6 +117,12 @@ func (s *WorldMapState) Load(g *engine.Game) {
 	}
 	s.flagAnimator.SetFrameSize(60, 60)
 
+	s.texts = []string{
+		"St Denis\n\nPoyox",
+		"St André\n\nJe suis\nun tacocat",
+		"St Untruc\n\nPtdr, t ki ?",
+	}
+
 	s.flagPositions = []engine.Vector2{
 		engine.Vector2{X: 180, Y: 8},
 		engine.Vector2{X: 220, Y: 20},
@@ -111,6 +133,24 @@ func (s *WorldMapState) Load(g *engine.Game) {
 func (s *WorldMapState) Update() error {
 	s.animator.Update(&s.water)
 	s.flagAnimator.Update(&s.mapFlag)
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		s.selectedFlag++
+		if s.selectedFlag >= len(s.flagPositions) {
+			s.selectedFlag = 0
+		}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		s.selectedFlag--
+		if s.selectedFlag < 0 {
+			s.selectedFlag = len(s.flagPositions) - 1
+		}
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		s.game.SetState(&PlayState{})
+	}
+
 	return nil
 }
 
@@ -128,5 +168,12 @@ func (s *WorldMapState) Draw(screen *ebiten.Image) {
 		s.mapFlag.Draw(screen)
 	}
 
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(0.4, 0.4)
+	op.GeoM.Translate(s.flagPositions[s.selectedFlag].X - 8, s.flagPositions[s.selectedFlag].Y - 2)
+	screen.DrawImage(s.selector, op);
+
 	vector.DrawFilledRect(screen, 0, 0, engine.ScreenWidth/4, engine.ScreenHeight, color.RGBA{0, 0, 0, 200}, false)
+
+	text.Draw(screen, s.texts[s.selectedFlag], s.dogica, 0, 8, color.RGBA{255, 255, 255, 255})
 }
