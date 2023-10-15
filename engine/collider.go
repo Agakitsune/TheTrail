@@ -9,7 +9,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
-	
+
 	"image/color"
 )
 
@@ -23,10 +23,10 @@ type Rectangle struct {
 type CollisionType int
 
 const (
-	Ground CollisionType = 9
-	Death = 32
-	Platform = 33
-	Trigger = 34
+	Ground   CollisionType = 9
+	Death                  = 32
+	Platform               = 33
+	Trigger                = 34
 )
 
 type CollisionBox struct {
@@ -36,10 +36,11 @@ type CollisionBox struct {
 }
 
 type Collider struct {
-	Boxes []CollisionBox
+	Boxes       []CollisionBox
+	playerBoxes []Rectangle
 
 	X int
-    Y int
+	Y int
 }
 
 type lineInfo struct {
@@ -54,7 +55,24 @@ type rectInfo struct {
 	y      int
 	width  int
 	height int
-	type_ CollisionType
+	type_  CollisionType
+}
+
+func (r Rectangle) Collides(r2 Rectangle) bool {
+	return r.X < r2.X+r2.Width &&
+		r.X+r.Width > r2.X &&
+		r.Y < r2.Y+r2.Height &&
+		r.Y+r.Height > r2.Y
+}
+
+func (r Rectangle) Draw(screen *ebiten.Image) {
+	vector.DrawFilledRect(screen,
+		float32(r.X),
+		float32(r.Y),
+		float32(r.Width),
+		float32(r.Height),
+		color.RGBA{255, 0, 0, 255},
+		false)
 }
 
 func NewColliderMap(path string, x, y int) *Collider {
@@ -145,94 +163,54 @@ func NewColliderMap(path string, x, y int) *Collider {
 	return collider
 }
 
-func (this *Collider) Update(game *Game, dood* MultiSprite) {
+func (this *Collider) Update(game *Game, dood *MultiSprite) {
+
+	w, h := int(12), int(16)
+	_ = w
+	_ = h
+
+	lp := []int{int(dood.X - dood.Velx), int(dood.Y - dood.Vely)}
+
+	this.playerBoxes = make([]Rectangle, 4)
+	this.playerBoxes[0] = Rectangle{int(dood.X) + 9, int(dood.Y) + (32-h)/2 + 4, 4, h}  // Left
+	this.playerBoxes[1] = Rectangle{int(dood.X) + 19, int(dood.Y) + (32-h)/2 + 4, 4, h} // Right
+	this.playerBoxes[2] = Rectangle{int(dood.X) + 10, int(dood.Y + 6), w, 4}            // Top
+	this.playerBoxes[3] = Rectangle{int(dood.X) + 10, int(dood.Y + 30), w, 4}           // Bottom
+
 	for _, b := range this.Boxes {
 		// println("\nX: ", fmt.Sprintf("%f", dood.X))
 		// println("Y: ", fmt.Sprintf("%f\n", dood.Y))
-		
-		if (dood.Vely != 0) {
-			// println("velx: ", fmt.Sprintf("%f", dood.Velx))
-			// println("gx: ", fmt.Sprintf("%f", dood.X))
-			// println("bx: ", fmt.Sprintf("%f", float64(b.Rect.X)))
-			// println("bx: ", fmt.Sprintf("%f", float64(b.Rect.X + b.Rect.Width)))
-			// println("gx + 22 + vel: ", fmt.Sprintf("%f", (dood.X + 22 + dood.Velx)))
-			// println("gx + 11 + vel: ", fmt.Sprintf("%f", (dood.X + 11 + dood.Velx)))
-			if ((dood.X + 22 + dood.Velx) <= float64(b.Rect.X + this.X) || (dood.X + 11 + dood.Velx) >= float64(b.Rect.X + b.Rect.Width + this.X)) {
-				continue
-			}
-			// if ((dood.Y + 32) < float64(b.Rect.Y + this.Y) || (dood.Y + 7) > float64(b.Rect.Y + b.Rect.Height + this.Y)) {
-			// 	continue
-			// }
-			// println("vely: ", fmt.Sprintf("%f", dood.Vely))
-			// println("gy: ", fmt.Sprintf("%f", dood.Y))
-			// println("by: ", fmt.Sprintf("%f", float64(b.Rect.Y)))
-			// println("by + bh: ", fmt.Sprintf("%f", float64(b.Rect.Y + b.Rect.Height)))
-			// println("gx + 32 + vel: ", fmt.Sprintf("%f", (dood.Y + 32 + dood.Vely)))
-			// println("gx + 7 + vel: ", fmt.Sprintf("%f", (dood.Y + 7 + dood.Vely)))
-			if ((dood.Y + 32 + dood.Vely) >= float64(b.Rect.Y + this.Y) && (dood.Y + 7 + dood.Vely) <= float64(b.Rect.Y + b.Rect.Height + this.Y)) {
-				if b.Type == Death {
-					println("YOU ARE DED, NOT BIG SURPRISE")
-					continue
-				} else if b.Type == Trigger {
-					println("TRIGGER")
-					continue
-				}
-				if dood.Vely > 0 {
-					dood.Jump = false
-					// dood.Y = float64(b.Rect.Y + this.Y - 32)
-					dood.Airborne = false
-				} else {
-					// dood.Y = float64(b.Rect.Y + b.Rect.Height + this.Y)
-				}
-				dood.Vely = 0
-			}
+
+		rect := Rectangle{b.Rect.X + this.X, b.Rect.Y + this.Y, b.Rect.Width, b.Rect.Height}
+
+		if this.playerBoxes[0].Collides(rect) && dood.Velx < 0 {
+			dood.Velx = 0
+			dood.X = float64(lp[0] - 1)
 		}
 
-		if (dood.Velx != 0) {
-			// println("vely: ", fmt.Sprintf("%f", dood.Vely))
-			// println("gy: ", fmt.Sprintf("%f", dood.Y))
-			// println("by: ", fmt.Sprintf("%f", b.Rect.Y))
-			// println("by + bh: ", fmt.Sprintf("%f",b.Rect.Y + b.Rect.Height))
-			// println("estimateMin: ", fmt.Sprintf("%f", (dood.Y + 32 + dood.Vely)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (dood.Y - 32 + dood.Vely)))
-			if ((dood.Y + 32 + dood.Vely) <= float64(b.Rect.Y + this.Y) || (dood.Y + 7 + dood.Vely) >= float64(b.Rect.Y + b.Rect.Height + this.Y)) {
-				continue
-			}
-			// println("velx: ", fmt.Sprintf("%f", dood.Velx))
-			// println("gx: ", fmt.Sprintf("%f", dood.X))
-			// println("bx: ", fmt.Sprintf("%f", b.Rect.X))
-			// println("bx: ", fmt.Sprintf("%f", b.Rect.X + b.Rect.Width))
-			// println("estimateMin: ", fmt.Sprintf("%f", (dood.X + 32 + dood.Velx)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (dood.X - 32 + dood.Velx)))
-			if ((dood.X + 22 + dood.Velx) >= float64(b.Rect.X + this.X) && (dood.X + 11 + dood.Velx) <= float64(b.Rect.X + b.Rect.Width + this.X)) {
-				if b.Type == Death {
-					println("YOU ARE DED, NOT BIG SURPRISE")
-					continue
-				} else if b.Type == Trigger {
-					println("TRIGGER")
-					continue
-				}
-				// else if b.Type == Scene {
-				// 	println("Scene")
-				// 	continue
-				// }
-				if dood.Velx > 0 {
-					// dood.X = float64(b.Rect.X + this.X - 22)
-				} else {
-					// dood.X = float64(b.Rect.X + b.Rect.Width + this.X - 11)
-				}
-				dood.Velx = 0
-			}
+		if this.playerBoxes[1].Collides(rect) && dood.Velx > 0 {
+			dood.Velx = 0
+			dood.X = float64(lp[0] + 1)
 		}
 
-		
+		if this.playerBoxes[2].Collides(rect) && dood.Vely < 0 {
+			dood.Vely = 0
+			dood.Y = float64(lp[1] + 1)
+		}
+
+		if this.playerBoxes[3].Collides(rect) && dood.Vely > 0 {
+			dood.Vely = 0
+			dood.Y = float64(rect.Y - 32)
+			dood.Airborne = false
+			dood.Jump = false
+		}
 	}
 }
 
 func (this *Collider) Draw(screen *ebiten.Image) {
 	for _, b := range this.Boxes {
 		clr := color.RGBA{0, 0, 0, 255}
-		if b.Type == Ground {	
+		if b.Type == Ground {
 			clr = color.RGBA{0, 255, 255, 2}
 		} else if b.Type == Death {
 			clr = color.RGBA{255, 0, 0, 2}
@@ -253,5 +231,9 @@ func (this *Collider) Draw(screen *ebiten.Image) {
 			clr,
 			false,
 		)
+	}
+
+	for _, b := range this.playerBoxes {
+		b.Draw(screen)
 	}
 }

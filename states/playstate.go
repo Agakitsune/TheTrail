@@ -31,18 +31,18 @@ func (s *PlayState) Update() error {
 		s.game.Dood.Vely += 0.1
 	}
 
-	if (s.game.SceneTransition) {
-		x := (1 - s.game.Timer) * float64(s.game.SceneX) + s.game.Timer * float64(s.game.ToSceneX)
-		y := (1 - s.game.Timer) * float64(s.game.SceneY) + s.game.Timer * float64(s.game.ToSceneY)
+	if s.game.SceneTransition {
+		x := (1-s.game.Timer)*float64(s.game.SceneX) + s.game.Timer*float64(s.game.ToSceneX)
+		y := (1-s.game.Timer)*float64(s.game.SceneY) + s.game.Timer*float64(s.game.ToSceneY)
 
 		s.game.Timer += 0.05
 
-		s.game.Cam.SetPosition(160 + x, 90 + y)
+		s.game.Cam.SetPosition(160+x, 90+y)
 
-		if (s.game.Timer >= 1) {
+		if s.game.Timer >= 1 {
 			s.game.SceneX = s.game.ToSceneX
 			s.game.SceneY = s.game.ToSceneY
-			s.game.Cam.SetPosition(160.0 + float64(s.game.SceneX), 90.0 + float64(s.game.SceneY))
+			s.game.Cam.SetPosition(160.0+float64(s.game.SceneX), 90.0+float64(s.game.SceneY))
 			s.game.SceneTransition = false
 		}
 	} else {
@@ -102,7 +102,7 @@ func (s *PlayState) Update() error {
 		if s.game.SceneY >= s.game.ToSceneY {
 			s.game.Dood.Y += s.game.Dood.Vely
 		}
-		return nil;
+		return nil
 	}
 
 	s.game.Dood.X += s.game.Dood.Velx
@@ -110,17 +110,20 @@ func (s *PlayState) Update() error {
 	return nil
 }
 
-func (s *PlayState) Draw(screen *ebiten.Image, camera* camera.Camera) {
+func (s *PlayState) Draw(screen *ebiten.Image, camera *camera.Camera) {
 	for _, tilemap := range s.game.Tilemap {
 		tilemap.Draw(screen, camera)
 	}
 
 	// s.game.Tilemap[s.game.SceneX].Draw(screen, camera)
 	s.game.Dood.Draw(screen, camera)
-	// s.game.Collider.Draw(screen)
 
 	if s.game.Debug {
 		ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()))
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS()), 0, 20)
+		for _, collider := range s.game.Collider {
+			collider.Draw(screen)
+		}
 	}
+
 }
