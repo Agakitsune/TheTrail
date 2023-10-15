@@ -188,10 +188,12 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 				dood.Vely = 0
 				dood.Jump = false
 			} else {
-				if !dood.SlowFall {
+				if !dood.SlowFall && dood.Stamina > 0 {
 					dood.Vely = 0.1
 					dood.SlowFall = true
 					dood.Dir = -1
+				} else {
+					dood.Dir = 0
 				}
 			}
 		}
@@ -204,17 +206,19 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 				dood.Vely = 0
 				dood.Jump = false
 			} else {
-				if !dood.SlowFall {
+				if !dood.SlowFall && dood.Stamina > 0 {
 					dood.Vely = 0.1
 					dood.SlowFall = true
 					dood.Dir = 1
+				} else {
+					dood.Dir = 0
 				}
 			}
 		}
 
-		if (this.playerBoxes[0].Collides(rect)) && dood.Climbing {
+		if (this.playerBoxes[0].Collides(rect)) {
 			
-			if dood.Y + 16 < float64(rect.Y) {
+			if dood.Y + 16 < float64(rect.Y) && dood.Climbing {
 				dood.Edge = true
 				dood.Climbing = false
 				dood.SlowFall = false
@@ -229,8 +233,8 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 			}
 		}
 
-		if (this.playerBoxes[1].Collides(rect)) && dood.Climbing {
-			if dood.Y + 16 < float64(rect.Y) {
+		if (this.playerBoxes[1].Collides(rect)) {
+			if dood.Y + 16 < float64(rect.Y) && dood.Climbing {
 				dood.Edge = true
 				dood.Climbing = false
 				dood.SlowFall = false
@@ -256,6 +260,7 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 			dood.Y = float64(rect.Y - 32)
 			dood.Airborne = false
 			dood.Jump = false
+			dood.Stamina = 200
 			dood.SlowFall = false
 		}
 	}

@@ -28,6 +28,8 @@ type MultiSprite struct {
 	Climbing bool
 	Edge bool
 
+	Stamina int
+
 	TrySlowFall bool
 	SlowFall bool
 	Dir int

@@ -92,7 +92,7 @@ func (s *PlayState) Update() error {
 			}
 
 			if ebiten.IsKeyPressed(ebiten.KeyShift) {
-				s.game.Dood.TryClimb = true
+				s.game.Dood.TryClimb = s.game.Dood.Stamina > 0
 			} else {
 				s.game.Dood.TryClimb = false
 			}
@@ -113,6 +113,10 @@ func (s *PlayState) Update() error {
 
 			s.game.Dood.Climbing = ebiten.IsKeyPressed(ebiten.KeyShift)
 
+			s.game.Dood.Stamina--
+
+			println(s.game.Dood.Stamina)
+
 			if !s.game.Dood.Edge && (ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp)) {
 				s.game.Dood.Vely = -0.2
 				moveY = true
@@ -125,12 +129,14 @@ func (s *PlayState) Update() error {
 
 			if ebiten.IsKeyPressed(ebiten.KeySpace) && !s.game.Dood.Jump {
 				// s.game.Animator.SetAnimation("jump")
-				if s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyD) {
+				if s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyD) && s.game.Dood.Stamina >= 10 {
 					s.game.Dood.Vely = -2
 					s.game.Dood.Velx = 2
-				} else if !s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyA) {
+					s.game.Dood.Stamina -= 10
+				} else if !s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyA) && s.game.Dood.Stamina >= 10 {
 					s.game.Dood.Vely = -2
 					s.game.Dood.Velx = -2
+					s.game.Dood.Stamina -= 10
 				}
 				s.game.Dood.Climbing = false
 				s.game.Dood.Jump = true
@@ -138,8 +144,16 @@ func (s *PlayState) Update() error {
 				moveY = true
 			}
 
+			if s.game.Dood.Stamina <= 0 {
+				s.game.Dood.Climbing = false
+				s.game.Dood.SlowFall = false
+			}
+
 			if !moveY {
 				s.game.Dood.Vely = 0
+				if s.game.Dood.Stamina <= 50 {
+					s.game.Dood.Vely = 0.1
+				}
 			}
 
 		}
