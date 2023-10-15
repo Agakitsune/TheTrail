@@ -37,8 +37,8 @@ type PlayState struct {
 	rawMusicData []byte
 }
 
-func (s *PlayState) Load(g *engine.Game) {
-	s.game = g
+func (s *PlayState) Load(gm *engine.Game) {
+	s.game = gm
 	s.game.Init()
 
 	file, err := os.Open("assets/EpitechGameJam-_In_Game.ogg")
@@ -64,6 +64,32 @@ func (s *PlayState) Load(g *engine.Game) {
 	s.rawMusicData = bs
 
 	file.Close()
+
+	// Play musik
+	var g = s
+
+	if g.audioContext == nil {
+		g.audioContext = audio.NewContext(sampleRate)
+	}
+
+	// Decode an Ogg file.
+	// oggS is a decoded io.ReadCloser and io.Seeker.
+	oggS, err := vorbis.DecodeWithoutResampling(bytes.NewReader(s.rawMusicData))
+	if err != nil {
+		panic(err)
+	}
+
+	// Create an infinite loop stream from the decoded bytes.
+	// s is still an io.ReadCloser and io.Seeker.
+	stream := audio.NewInfiniteLoopWithIntro(oggS, introLengthInSecond*bytesPerSample*sampleRate, loopLengthInSecond*bytesPerSample*sampleRate)
+
+	g.player, err = g.audioContext.NewPlayer(stream)
+	if err != nil {
+		panic(err)
+	}
+
+	// Play the infinite-length stream. This never ends.
+	g.player.Play()
 }
 
 func (s *PlayState) Update() error {
@@ -152,35 +178,6 @@ func (s *PlayState) Update() error {
 
 	s.game.Dood.X += s.game.Dood.Velx
 	s.game.Dood.Y += s.game.Dood.Vely
-
-	// Play musik
-	var g = s
-	if g.player != nil {
-		return nil
-	}
-
-	if g.audioContext == nil {
-		g.audioContext = audio.NewContext(sampleRate)
-	}
-
-	// Decode an Ogg file.
-	// oggS is a decoded io.ReadCloser and io.Seeker.
-	oggS, err := vorbis.DecodeWithoutResampling(bytes.NewReader(s.rawMusicData))
-	if err != nil {
-		return err
-	}
-
-	// Create an infinite loop stream from the decoded bytes.
-	// s is still an io.ReadCloser and io.Seeker.
-	stream := audio.NewInfiniteLoopWithIntro(oggS, introLengthInSecond*bytesPerSample*sampleRate, loopLengthInSecond*bytesPerSample*sampleRate)
-
-	g.player, err = g.audioContext.NewPlayer(stream)
-	if err != nil {
-		return err
-	}
-
-	// Play the infinite-length stream. This never ends.
-	g.player.Play()
 
 	return nil
 }
