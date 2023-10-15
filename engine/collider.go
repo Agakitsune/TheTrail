@@ -7,9 +7,9 @@ import (
 )
 
 type Rectangle struct {
-	X int
-	Y int
-	Width int
+	X      int
+	Y      int
+	Width  int
 	Height int
 }
 
@@ -18,25 +18,25 @@ type Collider struct {
 }
 
 type lineInfo struct {
-	x int
-	y int
+	x     int
+	y     int
 	width int
 }
 
 type rectInfo struct {
-	x int
-	y int
-	width int
+	x      int
+	y      int
+	width  int
 	height int
 }
 
-func NewColliderMap(path string)* Collider {
+func NewColliderMap(path string) *Collider {
 	var collider *Collider = new(Collider)
-    data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path)
 
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
 	found := false
 	pos := 0
@@ -44,43 +44,43 @@ func NewColliderMap(path string)* Collider {
 
 	info := make([]lineInfo, 0)
 
-    lines := strings.Split(string(data), "\n")
-    for i, line := range lines {
-        if len(line) > 1 {
-            for j, el := range strings.Split(line, ",") {
-                val, err := strconv.Atoi(el)
+	lines := strings.Split(strings.Replace(string(data), "\r", "", -1), "\n")
+	for i, line := range lines {
+		if len(line) > 1 {
+			for j, el := range strings.Split(line, ",") {
+				val, err := strconv.Atoi(el)
 
 				if err != nil {
 					panic(err)
 				}
 
-                if val != -1 {
+				if val != -1 {
 					if !found {
 						pos = j
 						found = true
 					}
 					width++
-                } else {
+				} else {
 					if found {
 						info = append(info, lineInfo{pos, i, width})
 						found = false
 						width = 0
 					}
 				}
-            }
+			}
 			if found {
 				info = append(info, lineInfo{pos, i, width})
 			}
 			found = false
 			width = 0
-        }
-    }
+		}
+	}
 
 	pending := make([]rectInfo, 0)
 	for _, line := range info {
 		newRect := true
 		for i, rect := range pending {
-			if rect.x == line.x && line.y == rect.y + rect.height {
+			if rect.x == line.x && line.y == rect.y+rect.height {
 				pending[i].height++
 				newRect = false
 				break

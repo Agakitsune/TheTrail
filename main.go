@@ -18,7 +18,8 @@ func main() {
 	var game = engine.CreateGame(state)
 
 	ebiten.SetWindowSize(engine.ScreenWidth*2, engine.ScreenHeight*2)
-	ebiten.SetWindowTitle("Animation (Ebitengine Demo)")
+	ebiten.SetWindowTitle("The Trail")
+	ebiten.SetMaxTPS(90)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
