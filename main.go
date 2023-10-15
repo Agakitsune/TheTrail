@@ -7,10 +7,7 @@ import (
 	"TheTrail/engine"
 	"TheTrail/states"
 
-	// "fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func main() {
