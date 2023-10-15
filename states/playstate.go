@@ -3,10 +3,8 @@ package states
 import (
 	"TheTrail/engine"
 
-	// "fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type PlayState struct {
