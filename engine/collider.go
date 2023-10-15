@@ -186,6 +186,7 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 			dood.Climbing = dood.TryClimb
 			if dood.Climbing {
 				dood.Vely = 0
+				dood.Jump = false
 			} else {
 				if !dood.SlowFall {
 					dood.Vely = 0.1
@@ -201,6 +202,7 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 			dood.Climbing = dood.TryClimb
 			if dood.Climbing {
 				dood.Vely = 0
+				dood.Jump = false
 			} else {
 				if !dood.SlowFall {
 					dood.Vely = 0.1
@@ -216,6 +218,7 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 				dood.Edge = true
 				dood.Climbing = false
 				dood.SlowFall = false
+				dood.Jump = true
 				dood.Vely = -2
 			} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
 				dood.Edge = true
@@ -231,6 +234,7 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 				dood.Edge = true
 				dood.Climbing = false
 				dood.SlowFall = false
+				dood.Jump = true
 				dood.Vely = -2
 			} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
 				dood.Edge = true

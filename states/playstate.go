@@ -123,6 +123,21 @@ func (s *PlayState) Update() error {
 				moveY = true
 			}
 
+			if ebiten.IsKeyPressed(ebiten.KeySpace) && !s.game.Dood.Jump {
+				// s.game.Animator.SetAnimation("jump")
+				if s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyD) {
+					s.game.Dood.Vely = -2
+					s.game.Dood.Velx = 2
+				} else if !s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyA) {
+					s.game.Dood.Vely = -2
+					s.game.Dood.Velx = -2
+				}
+				s.game.Dood.Climbing = false
+				s.game.Dood.Jump = true
+				s.game.Dood.Airborne = true
+				moveY = true
+			}
+
 			if !moveY {
 				s.game.Dood.Vely = 0
 			}
