@@ -16,7 +16,7 @@ type PlayState struct {
 func (s *PlayState) Load(g *engine.Game) {
 	s.game = g
 	s.game.Init()
-	engine.NewColliderMap("./assets/collide.csv")
+	// engine.NewColliderMap("./assets/collide.csv")
 }
 
 func (s *PlayState) Update() error {
