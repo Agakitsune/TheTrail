@@ -67,7 +67,7 @@ type EditorState struct {
     }
 
     func (s *EditorState) Update() error {
-        if ebiten.IsKeyPressed(ebiten.KeyA) {
+        if inpututil.IsKeyJustPressed(ebiten.KeyA) {
             fmt.Println("EditorState Update")
             s.game.SetState(&PlayState{})
         }
