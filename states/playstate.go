@@ -25,10 +25,19 @@ func (s *PlayState) Update() error {
 	s.game.Animator.Update(s.game.Dood)
 
 	moveX := false
+	moveY := false
 	run := true
 
-	if s.game.Dood.Vely < 4.0 {
-		s.game.Dood.Vely += 0.1
+	if !s.game.Dood.Climbing {
+		if s.game.Dood.SlowFall {
+			if s.game.Dood.Vely < 0.3 {
+				s.game.Dood.Vely += 0.05
+			}
+		} else {
+			if s.game.Dood.Vely < 4.0 {
+				s.game.Dood.Vely += 0.1
+			}
+		}
 	}
 
 	if s.game.SceneTransition {
@@ -47,47 +56,92 @@ func (s *PlayState) Update() error {
 		}
 	} else {
 
-		vel := 1.0
-		if ebiten.IsKeyPressed(ebiten.KeyShift) {
-			vel = 0.2
-			run = false
-		}
-		if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-			s.game.Dood.Velx = vel
-			s.game.Dood.Flip = false
-			if !s.game.Dood.Airborne {
-				if run {
-					s.game.Animator.SetAnimation("run")
-				} else {
-					s.game.Animator.SetAnimation("walk")
+		if !s.game.Dood.Climbing {
+			vel := 1.0
+
+			if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+				s.game.Dood.Velx = vel
+				s.game.Dood.Flip = false
+				if !s.game.Dood.Airborne {
+					if run {
+						s.game.Animator.SetAnimation("run")
+					} else {
+						s.game.Animator.SetAnimation("walk")
+					}
 				}
+				moveX = true
 			}
-			moveX = true
-		}
-		if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-			s.game.Dood.Velx = -vel
-			s.game.Dood.Flip = true
-			if !s.game.Dood.Airborne {
-				if run {
-					s.game.Animator.SetAnimation("run")
-				} else {
-					s.game.Animator.SetAnimation("walk")
+		
+			if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+				s.game.Dood.Velx = -vel
+				s.game.Dood.Flip = true
+				if !s.game.Dood.Airborne {
+					if run {
+						s.game.Animator.SetAnimation("run")
+					} else {
+						s.game.Animator.SetAnimation("walk")
+					}
 				}
+				moveX = true
 			}
-			moveX = true
-		}
-		if ebiten.IsKeyPressed(ebiten.KeySpace) && !s.game.Dood.Jump {
-			s.game.Animator.SetAnimation("jump")
-			s.game.Dood.Vely = -3
-			s.game.Dood.Jump = true
-			s.game.Dood.Airborne = true
-		}
-		if !moveX {
-			if !s.game.Dood.Airborne {
-				s.game.Animator.SetAnimation("idle")
+			if ebiten.IsKeyPressed(ebiten.KeySpace) && !s.game.Dood.Jump {
+				s.game.Animator.SetAnimation("jump")
+				s.game.Dood.Vely = -3
+				s.game.Dood.Jump = true
+				s.game.Dood.Airborne = true
 			}
-			s.game.Dood.Velx = 0
+
+			if ebiten.IsKeyPressed(ebiten.KeyShift) {
+				s.game.Dood.TryClimb = true
+			} else {
+				s.game.Dood.TryClimb = false
+			}
+
+			if s.game.Dood.SlowFall {
+				s.game.Dood.SlowFall = s.game.Dood.Dir == int(s.game.Dood.Velx)
+			}
+
+			if !moveX {
+				if !s.game.Dood.Airborne {
+					s.game.Animator.SetAnimation("idle")
+				}
+				s.game.Dood.Velx = 0
+				s.game.Dood.Dir = 0
+			}
+		} else {
+
+			s.game.Dood.Climbing = ebiten.IsKeyPressed(ebiten.KeyShift)
+
+			if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+				s.game.Dood.Vely = -0.2
+				// if !s.game.Dood.Airborne {
+				// 	if run {
+				// 		s.game.Animator.SetAnimation("run")
+				// 	} else {
+				// 		s.game.Animator.SetAnimation("walk")
+				// 	}
+				// }
+				moveY = true
+			}
+		
+			if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
+				s.game.Dood.Vely = 0.2
+				// if !s.game.Dood.Airborne {
+				// 	if run {
+				// 		s.game.Animator.SetAnimation("run")
+				// 	} else {
+				// 		s.game.Animator.SetAnimation("walk")
+				// 	}
+				// }
+				moveY = true
+			}
+
+			if !moveY {
+				s.game.Dood.Vely = 0
+			}
+
 		}
+		
 
 	}
 
