@@ -1,6 +1,6 @@
 package engine
 
-import(
+import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,9 +9,9 @@ import(
 )
 
 type MultiSprite struct {
-	sprites []*ebiten.Image
+	Sprites []*ebiten.Image
 
-	rect image.Rectangle
+	Rect image.Rectangle
 
 	Jump bool
 	Airborne bool
@@ -51,17 +51,18 @@ func (this MultiSprite) Draw(screen *ebiten.Image, camera* camera.Camera) {
 	op := &ebiten.DrawImageOptions{}
 
 	if this.Flip {
-		op.GeoM.Scale(-1, 1)
+		op.GeoM.Scale(-this.Scale.X, this.Scale.Y)
 		op.GeoM.Translate(32, 0)
+	} else {
+		op.GeoM.Scale(this.Scale.X, this.Scale.Y)
 	}
 
 	op.GeoM.Translate(this.X, this.Y)
 	op = camera.GetTranslation(op, 0, 0)
 
 	// flip it
-	
 
-	for _, sprite := range this.sprites {
-		screen.DrawImage(sprite.SubImage(this.rect).(*ebiten.Image), op)
+	for _, sprite := range this.Sprites {
+		screen.DrawImage(sprite.SubImage(this.Rect).(*ebiten.Image), op)
 	}
 }
