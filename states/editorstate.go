@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"image"
+	"image/color"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 )
@@ -29,6 +30,9 @@ type EditorState struct {
     arrowRectR image.Rectangle
     disableArrowRectL image.Rectangle
     disableArrowRectR image.Rectangle
+
+    title *ebiten.Image
+    goToMap *ebiten.Image
 }
 
     func (s *EditorState) Load(g *engine.Game) {
@@ -63,11 +67,14 @@ type EditorState struct {
 
         s.disableArrowRectL = image.Rect(40, 40, 80, 80)
         s.disableArrowRectR = image.Rect(0, 40, 40, 80)
+
+        s.title = engine.LoadImage("./assets/dood/title.png")
+        s.goToMap = engine.LoadImage("./assets/dood/goToMap.png")
         fmt.Println("EditorState Load")
     }
 
     func (s *EditorState) Update() error {
-        if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+        if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
             fmt.Println("EditorState Update")
             s.game.SetState(&PlayState{})
         }
@@ -135,8 +142,20 @@ type EditorState struct {
     }
 
     func (s *EditorState) Draw(screen *ebiten.Image) {
+
+        screen.Fill(color.RGBA{95, 181, 172, 100})
+
         op := &ebiten.DrawImageOptions{}
-        op.GeoM.Translate(0, 0)
+        op.GeoM.Translate(engine.ScreenWidth / 1.05, engine.ScreenHeight / 1.03)
+        op.GeoM.Scale(0.45, 0.45)
+        screen.DrawImage(s.goToMap, op)
+        op.GeoM.Reset()
+
+        op.GeoM.Translate(engine.ScreenWidth / 4, 3)
+        screen.DrawImage(s.title, op)
+        op.GeoM.Reset()
+
+        op.GeoM.Translate(2, 8)
         scalingFactor := 4.0
         op.GeoM.Scale(scalingFactor, scalingFactor)
 
@@ -146,7 +165,7 @@ type EditorState struct {
         op.GeoM.Reset()
 
         for i := 0; i < 3; i++ {
-            op.GeoM.Translate(35, float64(100 + 95 * i))
+            op.GeoM.Translate(40, float64(175 + 95 * i))
             scalingFactorArrowL := 0.4
             op.GeoM.Scale(scalingFactorArrowL, scalingFactorArrowL)
             if (s.currentChoice == i) {
@@ -159,7 +178,7 @@ type EditorState struct {
 
         for i :=0; i < 3; i++ {
             scalingFactorArrowR := 0.4
-            op.GeoM.Translate(250, float64(100 + 95 * i))
+            op.GeoM.Translate(280, float64(175 + 95 * i))
             op.GeoM.Scale(scalingFactorArrowR, scalingFactorArrowR)
             if (s.currentChoice == i) {
                 screen.DrawImage(ebiten.NewImageFromImage(s.arrow.SubImage(s.arrowRectR)), op)
@@ -168,8 +187,6 @@ type EditorState struct {
             }
             op.GeoM.Reset()
         }
-
-
 // 	fmt.Println("EditorState Draw")
 
 }
