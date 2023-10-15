@@ -136,6 +136,10 @@ func (s *PlayState) Update() error {
 		collider.Update(s.game, s.game.Dood)
 	}
 
+	if s.game.Dood.Climbing {
+		s.game.Animator.SetAnimation("climb")
+	}
+
 	// s.game.Collider[s.game.SceneX].Update(s.game, s.game.Dood)
 	s.game.Scene.Update(s.game, s.game.Dood)
 

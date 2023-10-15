@@ -211,11 +211,16 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 		}
 
 		if (this.playerBoxes[0].Collides(rect)) && dood.Climbing {
+			
 			if dood.Y + 16 < float64(rect.Y) {
 				dood.Edge = true
 				dood.Climbing = false
 				dood.SlowFall = false
 				dood.Vely = -2
+			} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
+				dood.Edge = true
+				dood.Climbing = false
+				dood.SlowFall = false
 			} else {
 				dood.Edge = false
 			}
@@ -227,6 +232,10 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 				dood.Climbing = false
 				dood.SlowFall = false
 				dood.Vely = -2
+			} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
+				dood.Edge = true
+				dood.Climbing = false
+				dood.SlowFall = false
 			} else {
 				dood.Edge = false
 			}

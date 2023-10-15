@@ -52,7 +52,7 @@ func (g *Game) SetState(state State) {
 func (g *Game) Init() {
 	g.Collider = make([]*Collider, 0)
 	g.Collider = append(g.Collider, NewColliderMap("./assets/new_collision.csv", 0, 0))
-	// g.Collider = append(g.Collider, NewColliderMap("./assets/next_collide.csv", 320, 0))
+	g.Collider = append(g.Collider, NewColliderMap("./assets/next_collide.csv", 320, 0))
 
 	g.Tilemap = make([]*Tilemap, 0)
 	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/new_draw.csv", "./assets/grass.png", 0, 0))
