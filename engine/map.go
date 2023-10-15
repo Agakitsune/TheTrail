@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -15,21 +15,21 @@ type Tilemap struct {
 	tiles []*ebiten.Image
 
 	Width int
-    Height int
+  Height int
 }
 
-func NewTilemap(mapPath, tilesetPath string)* Tilemap {
+func NewTilemap(mapPath, tilesetPath string) *Tilemap {
 	var gmap *Tilemap = new(Tilemap)
-    data, err := os.ReadFile(mapPath)
+	data, err := os.ReadFile(mapPath)
 
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
     tilesIndex := make([]int, 0)
     gmap.tiles = make([]*ebiten.Image, 0)
-	gmap.tileset = LoadImage(tilesetPath)
-    lines := strings.Split(string(data), "\n")
+	  gmap.tileset = LoadImage(tilesetPath)
+    lines := strings.Split(strings.Replace(string(data), "\r", "", -1), "\n")
     for i, line := range lines {
         if len(line) > 1 {
             for _, el := range strings.Split(line, ",") {
