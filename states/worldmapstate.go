@@ -13,14 +13,16 @@ import (
 	
 	"image"
 	"image/color"
+
+	camera "github.com/melonfunction/ebiten-camera"
 )
 
 type WorldMapState struct {
 	game          *engine.Game
 	animator      *engine.Animator
-	water         engine.MultiSprite
-	reunion       engine.MultiSprite
-	mapFlag       engine.MultiSprite
+	water         *engine.MultiSprite
+	reunion       *engine.MultiSprite
+	mapFlag       *engine.MultiSprite
 	flagAnimator  *engine.Animator
 	flagPositions []engine.Vector2
 	
@@ -41,28 +43,22 @@ func (s *WorldMapState) Load(g *engine.Game) {
 	s.game = g
 
 	// Water
-	s.water = engine.MultiSprite{
-		Sprites: []*ebiten.Image{
-			engine.LoadImage("./assets/water_animated.png"),
+	s.water = engine.NewSprite(
+		[]string{
+			"./assets/water_animated.png",
 		},
-		Rect: image.Rect(0, 0, 320, 128),
-		X:    0,
-		Y:    0,
-		Velx: 0,
-		Vely: 0,
-	}
+		image.Rect(0, 0, 320, 128),
+		engine.Vector2{1, 1},
+	)
 
 	// Reunion
-	s.reunion = engine.MultiSprite{
-		Sprites: []*ebiten.Image{
-			engine.LoadImage("./assets/caillou974.png"),
+	s.reunion = engine.NewSprite(
+		[]string{
+			"./assets/caillou974.png",
 		},
-		Rect: image.Rect(0, 0, 230, 204),
-		X:    0,
-		Y:    0,
-		Velx: 0,
-		Vely: 0,
-	}
+		image.Rect(0, 0, 230, 204),
+		engine.Vector2{1, 1},
+	)
 	s.reunion.X = 90
 
 	s.selector = engine.LoadImage("./assets/selector.png")
@@ -83,18 +79,13 @@ func (s *WorldMapState) Load(g *engine.Game) {
 	s.animator.SetFrameSize(320, 128)
 
 	// Flags
-	s.mapFlag = engine.MultiSprite{
-		Sprites: []*ebiten.Image{
-			engine.LoadImage("./assets/map_flag.png"),
+	s.mapFlag = engine.NewSprite(
+		[]string{
+			"./assets/map_flag.png",
 		},
-		Rect:        image.Rect(0, 0, 60, 60),
-		X:           0,
-		Y:           0,
-		Velx:        0,
-		Vely:        0,
-		Scale:       engine.Vector2{0.3, 0.3},
-		Initialized: true,
-	}
+		image.Rect(0, 0, 60, 60),
+		engine.Vector2{0.3, 0.3},
+	)
 
 	s.flagAnimator = &engine.Animator{
 		Animations: map[string]*engine.Animation{
@@ -131,8 +122,8 @@ func (s *WorldMapState) Load(g *engine.Game) {
 }
 
 func (s *WorldMapState) Update() error {
-	s.animator.Update(&s.water)
-	s.flagAnimator.Update(&s.mapFlag)
+	s.animator.Update(s.water)
+	s.flagAnimator.Update(s.mapFlag)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
 		s.selectedFlag++
@@ -154,18 +145,18 @@ func (s *WorldMapState) Update() error {
 	return nil
 }
 
-func (s *WorldMapState) Draw(screen *ebiten.Image) {
+func (s *WorldMapState) Draw(screen *ebiten.Image, camera *camera.Camera) {
 	s.water.Y = 0
-	s.water.Draw(screen)
+	s.water.Draw(screen, nil)
 	s.water.Y = 128
-	s.water.Draw(screen)
+	s.water.Draw(screen, nil)
 
-	s.reunion.Draw(screen)
+	s.reunion.Draw(screen, nil)
 
 	for _, pos := range s.flagPositions {
 		s.mapFlag.X = pos.X
 		s.mapFlag.Y = pos.Y
-		s.mapFlag.Draw(screen)
+		s.mapFlag.Draw(screen, nil)
 	}
 
 	op := &ebiten.DrawImageOptions{}

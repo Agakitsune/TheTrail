@@ -98,6 +98,7 @@ func (s *PlayState) Update() error {
 			}
 
 			if s.game.Dood.SlowFall {
+				s.game.Animator.SetAnimation("climb")
 				s.game.Dood.SlowFall = s.game.Dood.Dir == int(s.game.Dood.Velx)
 			}
 
@@ -112,27 +113,13 @@ func (s *PlayState) Update() error {
 
 			s.game.Dood.Climbing = ebiten.IsKeyPressed(ebiten.KeyShift)
 
-			if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+			if !s.game.Dood.Edge && (ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp)) {
 				s.game.Dood.Vely = -0.2
-				// if !s.game.Dood.Airborne {
-				// 	if run {
-				// 		s.game.Animator.SetAnimation("run")
-				// 	} else {
-				// 		s.game.Animator.SetAnimation("walk")
-				// 	}
-				// }
 				moveY = true
 			}
 		
 			if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
 				s.game.Dood.Vely = 0.2
-				// if !s.game.Dood.Airborne {
-				// 	if run {
-				// 		s.game.Animator.SetAnimation("run")
-				// 	} else {
-				// 		s.game.Animator.SetAnimation("walk")
-				// 	}
-				// }
 				moveY = true
 			}
 

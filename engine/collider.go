@@ -23,10 +23,10 @@ type Rectangle struct {
 type CollisionType int
 
 const (
-	Ground   CollisionType = 9
-	Death                  = 32
-	Platform               = 33
-	Trigger                = 34
+	Ground   CollisionType = 24
+	Death                  = 25
+	Edge 				   = 26
+	Platform               = 36
 )
 
 type CollisionBox struct {
@@ -134,9 +134,8 @@ func NewColliderMap(path string, x, y int) *Collider {
 	pending := make([]rectInfo, 0)
 	for _, line := range info {
 		newRect := true
-		// println(line.x, line.y, line.width, line.type_)
 		for i, rect := range pending {
-			if rect.x == line.x && line.y == rect.y+rect.height {
+			if rect.x == line.x && rect.width == line.width && line.y == rect.y + rect.height {
 				pending[i].height++
 				newRect = false
 				break
@@ -178,8 +177,6 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 	this.playerBoxes[3] = Rectangle{int(dood.X) + 10, int(dood.Y + 30), w, 4}           // Bottom
 
 	for _, b := range this.Boxes {
-		// println("\nX: ", fmt.Sprintf("%f", dood.X))
-		// println("Y: ", fmt.Sprintf("%f\n", dood.Y))
 
 		rect := Rectangle{b.Rect.X + this.X, b.Rect.Y + this.Y, b.Rect.Width, b.Rect.Height}
 
@@ -213,6 +210,28 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 			}
 		}
 
+		if (this.playerBoxes[0].Collides(rect)) && dood.Climbing {
+			if dood.Y + 16 < float64(rect.Y) {
+				dood.Edge = true
+				dood.Climbing = false
+				dood.SlowFall = false
+				dood.Vely = -2
+			} else {
+				dood.Edge = false
+			}
+		}
+
+		if (this.playerBoxes[1].Collides(rect)) && dood.Climbing {
+			if dood.Y + 16 < float64(rect.Y) {
+				dood.Edge = true
+				dood.Climbing = false
+				dood.SlowFall = false
+				dood.Vely = -2
+			} else {
+				dood.Edge = false
+			}
+		}
+
 		if this.playerBoxes[2].Collides(rect) && dood.Vely < 0 {
 			dood.Vely = 0
 			dood.Y = float64(lp[1] + 1)
@@ -238,10 +257,8 @@ func (this *Collider) Draw(screen *ebiten.Image) {
 			clr = color.RGBA{255, 0, 0, 2}
 		} else if b.Type == Platform {
 			clr = color.RGBA{0, 255, 0, 2}
-		} else if b.Type == Trigger {
+		} else if b.Type == Edge {
 			clr = color.RGBA{255, 0, 255, 2}
-		} else if b.Type == Trigger {
-			clr = color.RGBA{255, 255, 0, 2}
 		}
 
 		vector.DrawFilledRect(
