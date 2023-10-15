@@ -85,6 +85,52 @@ type EditorState struct {
                 s.currentChoice++
             }
         }
+        if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+            if (s.currentChoice == 0) {
+                if (s.indexH == 0){
+                    s.indexH = 2
+                } else {
+                    s.indexH--;
+                }
+            }
+            if (s.currentChoice == 1) {
+               if (s.indexT == 0){
+                   s.indexT = 2
+               } else {
+                   s.indexT--;
+               }
+            }
+            if (s.currentChoice == 2) {
+                if (s.indexB == 0){
+                    s.indexB = 2
+                } else {
+                    s.indexB--;
+                }
+            }
+        }
+        if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+            if (s.currentChoice == 0) {
+                if (s.indexH == 2){
+                    s.indexH = 0
+                } else {
+                    s.indexH++;
+                }
+            }
+            if (s.currentChoice == 1) {
+               if (s.indexT == 2){
+                   s.indexT = 0
+               } else {
+                   s.indexT++;
+               }
+            }
+            if (s.currentChoice == 2) {
+                if (s.indexB == 2){
+                    s.indexB = 0
+                } else {
+                    s.indexB++;
+                }
+            }
+        }
         return nil;
     }
 
