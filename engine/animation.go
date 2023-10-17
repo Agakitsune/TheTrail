@@ -1,59 +1,73 @@
 package engine
 
-import(
+import (
 	"image"
 )
 
 type Animation struct {
-	frames []int
-	row int
+	Frames    []int
+	FrameSize Vector2
+	Row       int
 
-	loopOn int
+	LoopOn int
 
-	selection int
-	speed int
+	Selection int
+	Speed     int
 
-	count int
+	Count int
 }
 
 type Animator struct {
-	animations map[string]*Animation
+	Animations map[string]*Animation
 
-	current string
+	Current string
+}
+
+func (this *Animator) SetFrameSize(x float64, y float64) {
+	for _, anim := range this.Animations {
+		anim.SetFrameSize(x, y)
+	}
+}
+
+func (this *Animation) SetFrameSize(x float64, y float64) {
+	this.FrameSize = Vector2{X: x, Y: y}
 }
 
 func (this *Animation) GetFrame(frame int) int {
-	return this.frames[frame]
+	return this.Frames[frame]
 }
 
 func (this *Animation) Update(sprite *MultiSprite) {
-	this.count++
+	this.Count++
 
-	if this.count % this.speed != 0 {
+	if this.Count%this.Speed != 0 {
 		return
 	}
-	this.selection++
+	this.Selection++
 
-	if this.selection >= len(this.frames) {
-		this.selection = this.loopOn
+	if this.Selection >= len(this.Frames) {
+		this.Selection = this.LoopOn
 	}
 
-	frame := this.GetFrame(this.selection)
-	sprite.rect = image.Rect(frame * 32, this.row * 32, frame * 32 + 32, this.row * 32 + 32)
+	frame := this.GetFrame(this.Selection)
+	sprite.Rect = image.Rect(frame*int(this.FrameSize.X),
+		this.Row*int(this.FrameSize.Y),
+		frame*int(this.FrameSize.X)+int(this.FrameSize.X),
+		this.Row*int(this.FrameSize.Y)+int(this.FrameSize.Y))
 }
 
 func (this *Animator) SetAnimation(name string) {
-	if this.current == name {
+	if this.Current == name {
 		return
 	}
-	var anim = this.animations[this.current]
-	anim.selection = 0
-	this.current = name
-	anim = this.animations[this.current]
-	anim.selection = 0
+	var anim = this.Animations[this.Current]
+	anim.Selection = 0
+	this.Current = name
+	anim = this.Animations[this.Current]
+	anim.Selection = 0
 }
 
 func (this *Animator) Update(sprite *MultiSprite) {
-	var anim = this.animations[this.current]
+	var anim = this.Animations[this.Current]
 	anim.Update(sprite)
 }

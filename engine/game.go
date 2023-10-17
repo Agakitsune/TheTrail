@@ -4,6 +4,7 @@ import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	camera "github.com/melonfunction/ebiten-camera"
 )
@@ -20,17 +21,25 @@ const (
 )
 
 type Game struct {
-	Dood MultiSprite
+	Dood* MultiSprite
 
-	Collider* Collider
+	Collider []*Collider
+	Tilemap []*Tilemap
 
-	Jump bool
-	Airborne bool
+	Scene *SceneTrigger
 
-	Tilemap *Tilemap
+	SceneTransition bool
+	SceneX int
+	SceneY int
+	ToSceneX int
+	ToSceneY int
+	Timer float64
+ 
 	Animator *Animator
 
 	Cam *camera.Camera
+
+	Debug bool
 
 	state State
 }
@@ -41,114 +50,93 @@ func (g *Game) SetState(state State) {
 }
 
 func (g *Game) Init() {
-	g.Collider = NewColliderMap("./assets/collide.csv")
-	g.Jump = false;
+	g.Collider = make([]*Collider, 0)
+	g.Collider = append(g.Collider, NewColliderMap("./assets/new_collision.csv", 0, 0))
+	g.Collider = append(g.Collider, NewColliderMap("./assets/next_collide.csv", 320, 0))
 
-	g.Cam = camera.NewCamera(320, 180, 0, 0, 0, 1)
+	g.Tilemap = make([]*Tilemap, 0)
+	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/new_draw.csv", "./assets/grass.png", 0, 0))
+	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/next_draw.csv", "./assets/tileset.png", 320, 0))
 
-	g.Dood = MultiSprite{
-		sprites: []*ebiten.Image{
-			LoadImage("./assets/dood/boots_one.png"),
-			LoadImage("./assets/dood/torso_three.png"),
-			LoadImage("./assets/dood/head_two.png"),
+	g.Scene = NewSceneTrigger(320, 180)
+
+	g.Cam = camera.NewCamera(320, 180, 160, 90, 0, 1)
+
+	g.Dood = NewSprite(
+		[]string{
+			"./assets/dood/boots_one.png",
+			"./assets/dood/torso_three.png",
+			"./assets/dood/head_two.png",
 		},
-		rect: image.Rect(0, 0, 32, 32),
-		X: 0,
-		Y: 0,
-		Velx: 0,
-		Vely: 0,
-	}
+		image.Rect(0, 0, 32, 32),
+		Vector2{1, 1},
+	)
+
+	g.Dood.X = 32
+	g.Dood.Y = 32
+
+	g.Dood.Jump = false;
+	g.Dood.Airborne = false;
 
 	g.Animator = &Animator{
-		animations: map[string]*Animation{
+		Animations: map[string]*Animation{
 			"idle": &Animation{
-				frames: []int{0, 1, 2, 3, 4, 5},
-				row: 0,
-				loopOn: 0,
-				selection: 0,
-				speed: 10,
+				Frames:    []int{0, 1, 2, 3, 4, 5},
+				Row:       0,
+				LoopOn:    0,
+				Selection: 0,
+				Speed:     10,
 			},
 			"walk": &Animation{
-				frames: []int{0, 1, 2, 3, 4, 5, 6},
-				row: 1,
-				loopOn: 1,
-				selection: 0,
-				speed: 10,
+				Frames:    []int{0, 1, 2, 3, 4, 5, 6},
+				Row:       1,
+				LoopOn:    1,
+				Selection: 0,
+				Speed:     10,
 			},
 			"run": &Animation{
-				frames: []int{0, 1, 2, 3, 4, 5},
-				row: 2,
-				loopOn: 0,
-				selection: 0,
-				speed: 10,
+				Frames:    []int{0, 1, 2, 3, 4, 5},
+				Row:       2,
+				LoopOn:    0,
+				Selection: 0,
+				Speed:     10,
 			},
 			"jump": &Animation{
-				frames: []int{0, 1, 2},
-				row: 3,
-				loopOn: 2,
-				selection: 0,
-				speed: 5,
+				Frames:    []int{0, 1, 2},
+				Row:       3,
+				LoopOn:    2,
+				Selection: 0,
+				Speed:     5,
+			},
+			"climb": &Animation{
+				Frames:    []int{0},
+				Row:       4,
+				LoopOn:    0,
+				Selection: 0,
+				Speed:     1,
 			},
 		},
-		current: "idle",
+		Current: "idle",
 	}
 
-	g.Tilemap = NewTilemap("./assets/map.csv", "./assets/tileset.png")
+	g.Animator.SetFrameSize(32, 32)
 
 	// Initialize the state
 	// g.state = nil
 }
 
-func (this *Game) Collide(boxes []Rectangle) {
-	for _, b := range boxes {
-		if (this.Dood.Vely != 0) {
-			// println("velx: ", fmt.Sprintf("%f", this.Dood.Velx))
-			// println("gx: ", fmt.Sprintf("%f", this.Dood.X))
-			// println("bx: ", fmt.Sprintf("%f", b.X))
-			// println("bx: ", fmt.Sprintf("%f", b.X + b.Width))
-			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.X + 32 + this.Dood.Velx)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.X - 32 + this.Dood.Velx)))
-			if ((this.Dood.X + 22 + this.Dood.Velx) <= float64(b.X) || (this.Dood.X + 11 + this.Dood.Velx) >= float64(b.X + b.Width)) {
-				continue
-			}
-			// println("vely: ", fmt.Sprintf("%f", this.Dood.Vely))
-			// println("gy: ", fmt.Sprintf("%f", this.Dood.Y))
-			// println("by: ", fmt.Sprintf("%f", b.Y))
-			// println("by + bh: ", fmt.Sprintf("%f",b.Y + b.Height))
-			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.Y + 32 + this.Dood.Vely)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.Y - 32 + this.Dood.Vely)))
-			if ((this.Dood.Y + 32 + this.Dood.Vely) >= float64(b.Y) && (this.Dood.Y + 7 + this.Dood.Vely) <= float64(b.Y + b.Height)) {
-				if this.Dood.Vely > 0 {
-					this.Jump = false
-					this.Airborne = false
-				}
-				this.Dood.Vely = 0
-			}
-		}
-		if (this.Dood.Velx != 0) {
-			// println("vely: ", fmt.Sprintf("%f", this.Dood.Vely))
-			// println("gy: ", fmt.Sprintf("%f", this.Dood.Y))
-			// println("by: ", fmt.Sprintf("%f", b.Y))
-			// println("by + bh: ", fmt.Sprintf("%f",b.Y + b.Height))
-			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.Y + 32 + this.Dood.Vely)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.Y - 32 + this.Dood.Vely)))
-			if ((this.Dood.Y + 32 + this.Dood.Vely) <= float64(b.Y) || (this.Dood.Y + 7 + this.Dood.Vely) >= float64(b.Y + b.Height)) {
-				continue
-			}
-			// println("velx: ", fmt.Sprintf("%f", this.Dood.Velx))
-			// println("gx: ", fmt.Sprintf("%f", this.Dood.X))
-			// println("bx: ", fmt.Sprintf("%f", b.X))
-			// println("bx: ", fmt.Sprintf("%f", b.X + b.Width))
-			// println("estimateMin: ", fmt.Sprintf("%f", (this.Dood.X + 32 + this.Dood.Velx)))
-			// println("estimateMax: ", fmt.Sprintf("%f", (this.Dood.X - 32 + this.Dood.Velx)))
-			if ((this.Dood.X + 22 + this.Dood.Velx) >= float64(b.X) && (this.Dood.X + 11 + this.Dood.Velx) <= float64(b.X + b.Width)) {
-				this.Dood.Velx = 0
-			}
-		}
-	}
+func (g *Game) MakeSceneTransition(x, y int) {
+	g.SceneTransition = true
+	g.ToSceneX = x
+	g.ToSceneY = y
+	g.Timer = 0
 }
 
 func (g *Game) Update() error {
+	if inpututil.IsKeyJustPressed(ebiten.KeyF3) {
+		g.Debug = !g.Debug
+	}
+
 	if g.state != nil {
 		return g.state.Update()
 	}
@@ -158,7 +146,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.state != nil {
 		g.Cam.Surface.Clear()
-		g.state.Draw(g.Cam.Surface)
+		g.state.Draw(g.Cam.Surface, g.Cam)
 
 		g.Cam.Blit(screen)
 	}
