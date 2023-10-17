@@ -1,28 +1,27 @@
 package states
 
 import (
-	"fmt"
-
 	"TheTrail/engine"
+
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	camera "github.com/melonfunction/ebiten-camera"
-
-	// raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 )
 
 type PlayState struct {
-	game		*engine.Game
-	music 	  	*engine.Audio
+	game  *engine.Game
+	music *engine.Audio
 }
 
-func (s *PlayState) Load(gm *engine.Game) {
-	s.game = gm
+func (s *PlayState) Load(g *engine.Game) {
+	s.game = g
 	s.game.Init()
 	s.music = engine.CreateAudio("assets/EpitechGameJam-_In_Game.ogg")
 	s.music.Play()
+	// engine.NewColliderMap("./assets/collide.csv")
 }
 
 func (s *PlayState) Update() error {
@@ -75,7 +74,7 @@ func (s *PlayState) Update() error {
 				}
 				moveX = true
 			}
-		
+
 			if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
 				s.game.Dood.Velx = -vel
 				s.game.Dood.Flip = true
@@ -125,7 +124,7 @@ func (s *PlayState) Update() error {
 				s.game.Dood.Vely = -0.2
 				moveY = true
 			}
-		
+
 			if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
 				s.game.Dood.Vely = 0.2
 				moveY = true
@@ -161,7 +160,6 @@ func (s *PlayState) Update() error {
 			}
 
 		}
-		
 
 	}
 
@@ -185,7 +183,6 @@ func (s *PlayState) Update() error {
 
 	s.game.Dood.X += s.game.Dood.Velx
 	s.game.Dood.Y += s.game.Dood.Vely
-
 	return nil
 }
 

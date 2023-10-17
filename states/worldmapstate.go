@@ -3,14 +3,14 @@ package states
 import (
 	"TheTrail/engine"
 	"fmt"
-	
+
 	"golang.org/x/image/font"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
-	
+	"github.com/hajimehoshi/ebiten/v2/vector"
+
 	"image"
 	"image/color"
 
@@ -25,13 +25,13 @@ type WorldMapState struct {
 	mapFlag       *engine.MultiSprite
 	flagAnimator  *engine.Animator
 	flagPositions []engine.Vector2
-	
-	texts         []string
+
+	texts []string
 
 	dogica font.Face
 
-	selectedFlag  int
-	selector *ebiten.Image
+	selectedFlag int
+	selector     *ebiten.Image
 }
 
 func (s *WorldMapState) Load(g *engine.Game) {
@@ -109,9 +109,9 @@ func (s *WorldMapState) Load(g *engine.Game) {
 	s.flagAnimator.SetFrameSize(60, 60)
 
 	s.texts = []string{
-		"St Denis\n\nPoyox",
-		"St André\n\nJe suis\nun tacocat",
-		"St Untruc\n\nPtdr, t ki ?",
+		"St Denis\n\nLa kapital",
+		"St André\n\nL'ecole\nlo band\ncoder",
+		"St Benoit\n\nLa ville\nla pli\npropre",
 	}
 
 	s.flagPositions = []engine.Vector2{
@@ -139,6 +139,7 @@ func (s *WorldMapState) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		s.game.Music.Pause()
 		s.game.SetState(&PlayState{})
 	}
 
@@ -161,8 +162,8 @@ func (s *WorldMapState) Draw(screen *ebiten.Image, camera *camera.Camera) {
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(0.4, 0.4)
-	op.GeoM.Translate(s.flagPositions[s.selectedFlag].X - 8, s.flagPositions[s.selectedFlag].Y - 2)
-	screen.DrawImage(s.selector, op);
+	op.GeoM.Translate(s.flagPositions[s.selectedFlag].X-8, s.flagPositions[s.selectedFlag].Y-2)
+	screen.DrawImage(s.selector, op)
 
 	vector.DrawFilledRect(screen, 0, 0, engine.ScreenWidth/4, engine.ScreenHeight, color.RGBA{0, 0, 0, 200}, false)
 

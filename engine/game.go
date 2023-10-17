@@ -21,25 +21,27 @@ const (
 )
 
 type Game struct {
-	Dood* MultiSprite
+	Dood *MultiSprite
 
 	Collider []*Collider
-	Tilemap []*Tilemap
+	Tilemap  []*Tilemap
 
 	Scene *SceneTrigger
 
 	SceneTransition bool
-	SceneX int
-	SceneY int
-	ToSceneX int
-	ToSceneY int
-	Timer float64
- 
+	SceneX          int
+	SceneY          int
+	ToSceneX        int
+	ToSceneY        int
+	Timer           float64
+
 	Animator *Animator
 
 	Cam *camera.Camera
 
 	Debug bool
+
+	Music *Audio
 
 	state State
 }
@@ -75,8 +77,8 @@ func (g *Game) Init() {
 	g.Dood.X = 32
 	g.Dood.Y = 32
 
-	g.Dood.Jump = false;
-	g.Dood.Airborne = false;
+	g.Dood.Jump = false
+	g.Dood.Airborne = false
 
 	g.Animator = &Animator{
 		Animations: map[string]*Animation{

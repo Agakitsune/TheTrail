@@ -36,6 +36,8 @@ type TitleScreenState struct {
 func (s *TitleScreenState) Load(g *engine.Game) {
 	s.image = engine.LoadImage("./assets/back_volcan.png")
 	s.game = g
+	g.Music = engine.CreateAudio("assets/EpitechGameJam_-_Main_Menu.ogg")
+	g.Music.Play()
 
 	tt, err := opentype.Parse(fonts.PressStart2P_ttf)
 	if err != nil {

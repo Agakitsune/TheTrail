@@ -77,7 +77,7 @@ func (s *EditorState) Load(g *engine.Game) {
 func (s *EditorState) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		fmt.Println("EditorState Update")
-		s.game.SetState(&PlayState{})
+		s.game.SetState(&WorldMapState{})
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
 		if s.currentChoice == 0 {

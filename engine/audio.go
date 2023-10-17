@@ -2,10 +2,10 @@ package engine
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"log"
 	"os"
-	"bytes"
 
 	// "github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -34,6 +34,8 @@ func (aud *Audio) Play() {
 func (aud *Audio) Pause() {
 	aud.player.Pause()
 }
+
+var context = audio.NewContext(sampleRate)
 
 func CreateAudio(path string) *Audio {
 	aud := &Audio{}
@@ -64,9 +66,7 @@ func CreateAudio(path string) *Audio {
 	file.Close()
 
 	// Play musik
-	if aud.audioContext == nil {
-		aud.audioContext = audio.NewContext(sampleRate)
-	}
+	aud.audioContext = context
 
 	// Decode an Ogg file.
 	// oggS is a decoded io.ReadCloser and io.Seeker.
