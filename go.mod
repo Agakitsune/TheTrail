@@ -12,6 +12,7 @@ require (
 	github.com/EngoEngine/gl v1.0.14 // indirect
 	github.com/EngoEngine/math v1.0.4 // indirect
 	github.com/Noofbiz/sdlMojaveFix v0.0.1 // indirect
+	github.com/ebitengine/oto/v3 v3.1.0 // indirect
 	github.com/ebitengine/purego v0.5.0 // indirect
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220806181222-55e207c401ad // indirect
@@ -25,4 +26,5 @@ require (
 	golang.org/x/mobile v0.0.0-20230922142353-e2f452493d57 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 )
