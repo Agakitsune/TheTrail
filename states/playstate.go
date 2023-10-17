@@ -29,10 +29,19 @@ func (s *PlayState) Update() error {
 	s.game.Animator.Update(s.game.Dood)
 
 	moveX := false
+	moveY := false
 	run := true
 
-	if s.game.Dood.Vely < 4.0 {
-		s.game.Dood.Vely += 0.1
+	if !s.game.Dood.Climbing {
+		if s.game.Dood.SlowFall {
+			if s.game.Dood.Vely < 0.3 {
+				s.game.Dood.Vely += 0.05
+			}
+		} else {
+			if s.game.Dood.Vely < 4.0 {
+				s.game.Dood.Vely += 0.1
+			}
+		}
 	}
 
 	if s.game.SceneTransition {
@@ -51,52 +60,117 @@ func (s *PlayState) Update() error {
 		}
 	} else {
 
-		vel := 1.0
-		if ebiten.IsKeyPressed(ebiten.KeyShift) {
-			vel = 0.2
-			run = false
-		}
-		if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-			s.game.Dood.Velx = vel
-			s.game.Dood.Flip = false
-			if !s.game.Dood.Airborne {
-				if run {
-					s.game.Animator.SetAnimation("run")
-				} else {
-					s.game.Animator.SetAnimation("walk")
+		if !s.game.Dood.Climbing {
+			vel := 1.0
+
+			if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+				s.game.Dood.Velx = vel
+				s.game.Dood.Flip = false
+				if !s.game.Dood.Airborne {
+					if run {
+						s.game.Animator.SetAnimation("run")
+					} else {
+						s.game.Animator.SetAnimation("walk")
+					}
+				}
+				moveX = true
+			}
+		
+			if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+				s.game.Dood.Velx = -vel
+				s.game.Dood.Flip = true
+				if !s.game.Dood.Airborne {
+					if run {
+						s.game.Animator.SetAnimation("run")
+					} else {
+						s.game.Animator.SetAnimation("walk")
+					}
+				}
+				moveX = true
+			}
+			if ebiten.IsKeyPressed(ebiten.KeySpace) && !s.game.Dood.Jump {
+				s.game.Animator.SetAnimation("jump")
+				s.game.Dood.Vely = -3
+				s.game.Dood.Jump = true
+				s.game.Dood.Airborne = true
+			}
+
+			if ebiten.IsKeyPressed(ebiten.KeyShift) {
+				s.game.Dood.TryClimb = s.game.Dood.Stamina > 0
+			} else {
+				s.game.Dood.TryClimb = false
+			}
+
+			if s.game.Dood.SlowFall {
+				s.game.Animator.SetAnimation("climb")
+				s.game.Dood.SlowFall = s.game.Dood.Dir == int(s.game.Dood.Velx)
+			}
+
+			if !moveX {
+				if !s.game.Dood.Airborne {
+					s.game.Animator.SetAnimation("idle")
+				}
+				s.game.Dood.Velx = 0
+				s.game.Dood.Dir = 0
+			}
+		} else {
+
+			s.game.Dood.Climbing = ebiten.IsKeyPressed(ebiten.KeyShift)
+
+			s.game.Dood.Stamina--
+
+			println(s.game.Dood.Stamina)
+
+			if !s.game.Dood.Edge && (ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp)) {
+				s.game.Dood.Vely = -0.2
+				moveY = true
+			}
+		
+			if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
+				s.game.Dood.Vely = 0.2
+				moveY = true
+			}
+
+			if ebiten.IsKeyPressed(ebiten.KeySpace) && !s.game.Dood.Jump {
+				// s.game.Animator.SetAnimation("jump")
+				if s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyD) && s.game.Dood.Stamina >= 10 {
+					s.game.Dood.Vely = -2
+					s.game.Dood.Velx = 2
+					s.game.Dood.Stamina -= 10
+				} else if !s.game.Dood.Flip && ebiten.IsKeyPressed(ebiten.KeyA) && s.game.Dood.Stamina >= 10 {
+					s.game.Dood.Vely = -2
+					s.game.Dood.Velx = -2
+					s.game.Dood.Stamina -= 10
+				}
+				s.game.Dood.Climbing = false
+				s.game.Dood.Jump = true
+				s.game.Dood.Airborne = true
+				moveY = true
+			}
+
+			if s.game.Dood.Stamina <= 0 {
+				s.game.Dood.Climbing = false
+				s.game.Dood.SlowFall = false
+			}
+
+			if !moveY {
+				s.game.Dood.Vely = 0
+				if s.game.Dood.Stamina <= 50 {
+					s.game.Dood.Vely = 0.1
 				}
 			}
-			moveX = true
+
 		}
-		if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-			s.game.Dood.Velx = -vel
-			s.game.Dood.Flip = true
-			if !s.game.Dood.Airborne {
-				if run {
-					s.game.Animator.SetAnimation("run")
-				} else {
-					s.game.Animator.SetAnimation("walk")
-				}
-			}
-			moveX = true
-		}
-		if ebiten.IsKeyPressed(ebiten.KeySpace) && !s.game.Dood.Jump {
-			s.game.Animator.SetAnimation("jump")
-			s.game.Dood.Vely = -3
-			s.game.Dood.Jump = true
-			s.game.Dood.Airborne = true
-		}
-		if !moveX {
-			if !s.game.Dood.Airborne {
-				s.game.Animator.SetAnimation("idle")
-			}
-			s.game.Dood.Velx = 0
-		}
+		
 
 	}
 
 	for _, collider := range s.game.Collider {
 		collider.Update(s.game, s.game.Dood)
+	}
+
+	if s.game.Dood.Climbing {
+		s.game.Animator.SetAnimation("climb")
 	}
 
 	// s.game.Collider[s.game.SceneX].Update(s.game, s.game.Dood)

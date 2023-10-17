@@ -3,11 +3,7 @@ package engine
 import (
 	"image"
 
-	"fmt"
-	// "math"
-
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	camera "github.com/melonfunction/ebiten-camera"
@@ -38,7 +34,7 @@ type Game struct {
 	ToSceneX int
 	ToSceneY int
 	Timer float64
-
+ 
 	Animator *Animator
 
 	Cam *camera.Camera
@@ -55,11 +51,11 @@ func (g *Game) SetState(state State) {
 
 func (g *Game) Init() {
 	g.Collider = make([]*Collider, 0)
-	g.Collider = append(g.Collider, NewColliderMap("./assets/map_collide.csv", 0, 0))
+	g.Collider = append(g.Collider, NewColliderMap("./assets/new_collision.csv", 0, 0))
 	g.Collider = append(g.Collider, NewColliderMap("./assets/next_collide.csv", 320, 0))
 
 	g.Tilemap = make([]*Tilemap, 0)
-	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/map_draw.csv", "./assets/tileset.png", 0, 0))
+	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/new_draw.csv", "./assets/grass.png", 0, 0))
 	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/next_draw.csv", "./assets/tileset.png", 320, 0))
 
 	g.Scene = NewSceneTrigger(320, 180)
@@ -67,10 +63,13 @@ func (g *Game) Init() {
 	g.Cam = camera.NewCamera(320, 180, 160, 90, 0, 1)
 
 	g.Dood = NewSprite(
-		"./assets/dood/boots_one.png",
-		"./assets/dood/torso_three.png",
-		"./assets/dood/head_two.png",
+		[]string{
+			"./assets/dood/boots_one.png",
+			"./assets/dood/torso_three.png",
+			"./assets/dood/head_two.png",
+		},
 		image.Rect(0, 0, 32, 32),
+		Vector2{1, 1},
 	)
 
 	g.Dood.X = 32
@@ -80,39 +79,50 @@ func (g *Game) Init() {
 	g.Dood.Airborne = false;
 
 	g.Animator = &Animator{
-		animations: map[string]*Animation{
+		Animations: map[string]*Animation{
 			"idle": &Animation{
-				frames: []int{0, 1, 2, 3, 4, 5},
-				row: 0,
-				loopOn: 0,
-				selection: 0,
-				speed: 10,
+				Frames:    []int{0, 1, 2, 3, 4, 5},
+				Row:       0,
+				LoopOn:    0,
+				Selection: 0,
+				Speed:     10,
 			},
 			"walk": &Animation{
-				frames: []int{0, 1, 2, 3, 4, 5, 6},
-				row: 1,
-				loopOn: 1,
-				selection: 0,
-				speed: 10,
+				Frames:    []int{0, 1, 2, 3, 4, 5, 6},
+				Row:       1,
+				LoopOn:    1,
+				Selection: 0,
+				Speed:     10,
 			},
 			"run": &Animation{
-				frames: []int{0, 1, 2, 3, 4, 5},
-				row: 2,
-				loopOn: 0,
-				selection: 0,
-				speed: 10,
+				Frames:    []int{0, 1, 2, 3, 4, 5},
+				Row:       2,
+				LoopOn:    0,
+				Selection: 0,
+				Speed:     10,
 			},
 			"jump": &Animation{
-				frames: []int{0, 1, 2},
-				row: 3,
-				loopOn: 2,
-				selection: 0,
-				speed: 5,
+				Frames:    []int{0, 1, 2},
+				Row:       3,
+				LoopOn:    2,
+				Selection: 0,
+				Speed:     5,
+			},
+			"climb": &Animation{
+				Frames:    []int{0},
+				Row:       4,
+				LoopOn:    0,
+				Selection: 0,
+				Speed:     1,
 			},
 		},
-		current: "idle",
+		Current: "idle",
 	}
 
+	g.Animator.SetFrameSize(32, 32)
+
+	// Initialize the state
+	// g.state = nil
 }
 
 func (g *Game) MakeSceneTransition(x, y int) {
@@ -139,16 +149,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.state.Draw(g.Cam.Surface, g.Cam)
 
 		g.Cam.Blit(screen)
-
-		ebitenutil.DebugPrint(screen,
-			fmt.Sprintf(
-				"Camera:\n  X: %3.3f  Y: %3.3f  W: %d  H: %d\n",
-				g.Cam.X, g.Cam.Y, g.Cam.Surface.Bounds().Size().X, g.Cam.Surface.Bounds().Size().Y,
-			) + fmt.Sprintf(
-				"Player:\n  X: %3.3f  Y: %3.3f  VelX: %3.3f  VelY: %3.3f\n",
-				g.Dood.X, g.Dood.Y, g.Dood.Velx, g.Dood.Vely,
-			),
-		)
 	}
 }
 

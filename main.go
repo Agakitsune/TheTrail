@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	var state engine.State = &states.PlayState{}
+	var state engine.State = &states.TitleScreenState{}
+
 	var game = engine.CreateGame(state)
 
 	ebiten.SetWindowSize(engine.ScreenWidth*4, engine.ScreenHeight*4)

@@ -1,10 +1,11 @@
 module TheTrail
 
-go 1.21.3
+go 1.20
 
 require (
-	github.com/EngoEngine/engo v1.0.8
 	github.com/hajimehoshi/ebiten/v2 v2.6.2
+	github.com/melonfunction/ebiten-camera v0.0.0-20220812153034-695003d18a6d
+	golang.org/x/image v0.13.0
 )
 
 require (
@@ -24,9 +25,10 @@ require (
 	github.com/veandco/go-sdl2 v0.4.25 // indirect
 	github.com/vulkan-go/glfw v0.0.0-20210402172934-58379a80228d // indirect
 	github.com/vulkan-go/vulkan v0.0.0-20210402152248-956e3850d8f9 // indirect
+	github.com/jezek/xgb v1.1.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20230817173708-d852ddb80c63 // indirect
-	golang.org/x/image v0.12.0 // indirect
 	golang.org/x/mobile v0.0.0-20230922142353-e2f452493d57 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 )
