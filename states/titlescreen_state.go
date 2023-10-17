@@ -11,6 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	camera "github.com/melonfunction/ebiten-camera"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -67,7 +68,7 @@ func (s *TitleScreenState) Update() error {
 	return nil
 }
 
-func (s *TitleScreenState) Draw(screen *ebiten.Image) {
+func (s *TitleScreenState) Draw(screen *ebiten.Image, camera *camera.Camera) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(0.05, 0.06)
 
