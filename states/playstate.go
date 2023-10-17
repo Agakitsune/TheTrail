@@ -1,24 +1,28 @@
 package states
 
 import (
-	"TheTrail/engine"
-
 	"fmt"
+
+	"TheTrail/engine"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	camera "github.com/melonfunction/ebiten-camera"
+
+	// raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 )
 
 type PlayState struct {
-	game *engine.Game
+	game		*engine.Game
+	music 	  	*engine.Audio
 }
 
-func (s *PlayState) Load(g *engine.Game) {
-	s.game = g
+func (s *PlayState) Load(gm *engine.Game) {
+	s.game = gm
 	s.game.Init()
-	// engine.NewColliderMap("./assets/collide.csv")
+	s.music = engine.CreateAudio("assets/EpitechGameJam-_In_Game.ogg")
+	s.music.Play()
 }
 
 func (s *PlayState) Update() error {
@@ -181,6 +185,7 @@ func (s *PlayState) Update() error {
 
 	s.game.Dood.X += s.game.Dood.Velx
 	s.game.Dood.Y += s.game.Dood.Vely
+
 	return nil
 }
 
