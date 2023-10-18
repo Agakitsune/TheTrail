@@ -6,8 +6,8 @@ type SceneTrigger struct {
 	Width int
 	Height int
 
-	shiftX int
-	shiftY int
+	ShiftX int
+	ShiftY int
 }
 
 func NewSceneTrigger(width, height int) *SceneTrigger {
@@ -20,39 +20,39 @@ func NewSceneTrigger(width, height int) *SceneTrigger {
 }
 
 func (this *SceneTrigger) Update(game *Game, dood *MultiSprite) {
-	if (dood.X + 14 > float64(this.Width + this.shiftX * this.Width)) {
+	if (dood.X + 14 > float64(this.Width + this.ShiftX * this.Width)) {
 		if this.inside {
 			return
 		}
 		
-		this.shiftX++
+		this.ShiftX++
 		this.inside = true
-	} else if (dood.X + 18 < float64(this.shiftX * this.Width)) {
+	} else if (dood.X + 18 < float64(this.ShiftX * this.Width)) {
 		if this.inside {
 			return
 		}
 
-		this.shiftX--
+		this.ShiftX--
 		this.inside = true
-	} else if (dood.Y > float64(this.Height + this.shiftY * this.Height)) {
+	} else if (dood.Y > float64(this.Height + this.ShiftY * this.Height)) {
 		if this.inside {
 			return
 		}
 
-		this.shiftY++
+		this.ShiftY++
 		this.inside = true
-	} else if (dood.Y + 32 < float64(this.shiftY * this.Height)) {
+	} else if (dood.Y + 32 < float64(this.ShiftY * this.Height)) {
 		if this.inside {
 			return
 		}
 
-		this.shiftY--
+		this.ShiftY--
 		this.inside = true
 	} else {
 		this.inside = false
 	}
 	if (this.inside) {
-		game.MakeSceneTransition(this.shiftX * this.Width, this.shiftY * this.Height)		
+		game.MakeSceneTransition(this.ShiftX * this.Width, this.ShiftY * this.Height)		
 	}
 
 }

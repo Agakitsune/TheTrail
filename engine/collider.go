@@ -11,6 +11,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	"image/color"
+
+	camera "github.com/melonfunction/ebiten-camera"
 )
 
 type Rectangle struct {
@@ -23,10 +25,10 @@ type Rectangle struct {
 type CollisionType int
 
 const (
-	Ground   CollisionType = 24
-	Death                  = 25
-	Edge 				   = 26
-	Platform               = 36
+	Ground   CollisionType = 30
+	Death                  = 31
+	Platform               = 32
+	Win               = 45
 )
 
 type CollisionBox struct {
@@ -65,13 +67,13 @@ func (r Rectangle) Collides(r2 Rectangle) bool {
 		r.Y+r.Height > r2.Y
 }
 
-func (r Rectangle) Draw(screen *ebiten.Image) {
+func (r Rectangle) Draw(screen *ebiten.Image, x, y float32) {
 	vector.DrawFilledRect(screen,
-		float32(r.X),
-		float32(r.Y),
+		float32(r.X) + x,
+		float32(r.Y) + y,
 		float32(r.Width),
 		float32(r.Height),
-		color.RGBA{255, 0, 0, 255},
+		color.RGBA{255, 0, 255, 20},
 		false)
 }
 
@@ -170,103 +172,127 @@ func (this *Collider) Update(game *Game, dood *MultiSprite) {
 
 	lp := []int{int(dood.X - dood.Velx), int(dood.Y - dood.Vely)}
 
-	this.playerBoxes = make([]Rectangle, 4)
+	this.playerBoxes = make([]Rectangle, 5)
 	this.playerBoxes[0] = Rectangle{int(dood.X) + 9, int(dood.Y) + (32-h)/2 + 4, 4, h}  // Left
 	this.playerBoxes[1] = Rectangle{int(dood.X) + 19, int(dood.Y) + (32-h)/2 + 4, 4, h} // Right
 	this.playerBoxes[2] = Rectangle{int(dood.X) + 10, int(dood.Y + 6), w, 4}            // Top
 	this.playerBoxes[3] = Rectangle{int(dood.X) + 10, int(dood.Y + 30), w, 4}           // Bottom
+	this.playerBoxes[4] = Rectangle{int(dood.X) + 10, int(dood.Y + 14), 12, 12}           // DeathZone
 
 	for _, b := range this.Boxes {
 
 		rect := Rectangle{b.Rect.X + this.X, b.Rect.Y + this.Y, b.Rect.Width, b.Rect.Height}
 
-		if this.playerBoxes[0].Collides(rect) && dood.Velx < 0 {
-			dood.Velx = 0
-			dood.X = float64(lp[0] - 1)
-			dood.Climbing = dood.TryClimb
-			if dood.Climbing {
-				dood.Vely = 0
-				dood.Jump = false
-			} else {
-				if !dood.SlowFall && dood.Stamina > 0 {
-					dood.Vely = 0.1
-					dood.SlowFall = true
-					dood.Dir = -1
-				} else {
-					dood.Dir = 0
+		if b.Type == Win {
+
+			if this.playerBoxes[4].Collides(rect) {
+				dood.Win = true
+			}
+
+		} else if b.Type == Death {
+
+			if this.playerBoxes[4].Collides(rect) {
+				dood.Dead = true
+			}
+
+		} else {
+			if b.Type != Platform {
+
+				if this.playerBoxes[0].Collides(rect) && dood.Velx < 0 {
+					dood.Velx = 0
+					dood.X = float64(lp[0] - 1)
+					dood.Climbing = dood.TryClimb
+					if dood.Climbing {
+						dood.Vely = 0
+						dood.Jump = false
+					} else {
+						if !dood.SlowFall && dood.Stamina > 0 {
+							dood.Vely = 0.1
+							dood.SlowFall = true
+							dood.Dir = -1
+						} else {
+							dood.Dir = 0
+						}
+					}
+				}
+
+				if this.playerBoxes[1].Collides(rect) && dood.Velx > 0 {
+					dood.Velx = 0
+					dood.X = float64(lp[0] + 1)
+					dood.Climbing = dood.TryClimb
+					if dood.Climbing {
+						dood.Vely = 0
+						dood.Jump = false
+					} else {
+						if !dood.SlowFall && dood.Stamina > 0 {
+							dood.Vely = 0.1
+							dood.SlowFall = true
+							dood.Dir = 1
+						} else {
+							dood.Dir = 0
+						}
+					}
+				}
+
+				if (this.playerBoxes[0].Collides(rect)) {
+					
+					if dood.Y + 16 < float64(rect.Y) && dood.Climbing {
+						dood.Edge = true
+						dood.Climbing = false
+						dood.SlowFall = false
+						dood.Jump = true
+						dood.Vely = -2
+					} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
+						dood.Edge = true
+						dood.Climbing = false
+						dood.SlowFall = false
+					} else {
+						dood.Edge = false
+					}
+				}
+
+				if (this.playerBoxes[1].Collides(rect)) {
+					if dood.Y + 16 < float64(rect.Y) && dood.Climbing {
+						dood.Edge = true
+						dood.Climbing = false
+						dood.SlowFall = false
+						dood.Jump = true
+						dood.Vely = -2
+					} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
+						dood.Edge = true
+						dood.Climbing = false
+						dood.SlowFall = false
+					} else {
+						dood.Edge = false
+					}
+				}
+
+				if this.playerBoxes[2].Collides(rect) && dood.Vely < 0 {
+					dood.Vely = 0
+					dood.Y = float64(lp[1] + 1)
+					dood.SlowFall = false
+				}
+
+			}
+
+			if !dood.Falltrough || b.Type != Platform {
+				if this.playerBoxes[3].Collides(rect) && dood.Vely > 0 {
+					dood.Vely = 0
+					dood.Y = float64(rect.Y - 32)
+					dood.Airborne = false
+					dood.Jump = false
+					dood.Stamina = 500
+					dood.SlowFall = false
 				}
 			}
-		}
-
-		if this.playerBoxes[1].Collides(rect) && dood.Velx > 0 {
-			dood.Velx = 0
-			dood.X = float64(lp[0] + 1)
-			dood.Climbing = dood.TryClimb
-			if dood.Climbing {
-				dood.Vely = 0
-				dood.Jump = false
-			} else {
-				if !dood.SlowFall && dood.Stamina > 0 {
-					dood.Vely = 0.1
-					dood.SlowFall = true
-					dood.Dir = 1
-				} else {
-					dood.Dir = 0
-				}
-			}
-		}
-
-		if (this.playerBoxes[0].Collides(rect)) {
-			
-			if dood.Y + 16 < float64(rect.Y) && dood.Climbing {
-				dood.Edge = true
-				dood.Climbing = false
-				dood.SlowFall = false
-				dood.Jump = true
-				dood.Vely = -2
-			} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
-				dood.Edge = true
-				dood.Climbing = false
-				dood.SlowFall = false
-			} else {
-				dood.Edge = false
-			}
-		}
-
-		if (this.playerBoxes[1].Collides(rect)) {
-			if dood.Y + 16 < float64(rect.Y) && dood.Climbing {
-				dood.Edge = true
-				dood.Climbing = false
-				dood.SlowFall = false
-				dood.Jump = true
-				dood.Vely = -2
-			} else if dood.Y + 16 > float64(rect.Y + rect.Height) {
-				dood.Edge = true
-				dood.Climbing = false
-				dood.SlowFall = false
-			} else {
-				dood.Edge = false
-			}
-		}
-
-		if this.playerBoxes[2].Collides(rect) && dood.Vely < 0 {
-			dood.Vely = 0
-			dood.Y = float64(lp[1] + 1)
-			dood.SlowFall = false
-		}
-
-		if this.playerBoxes[3].Collides(rect) && dood.Vely > 0 {
-			dood.Vely = 0
-			dood.Y = float64(rect.Y - 32)
-			dood.Airborne = false
-			dood.Jump = false
-			dood.Stamina = 200
-			dood.SlowFall = false
 		}
 	}
 }
 
-func (this *Collider) Draw(screen *ebiten.Image) {
+func (this *Collider) Draw(screen *ebiten.Image, camera *camera.Camera) {
+	Xshift := float32(camera.X) - 160;
+	Yshift := float32(camera.Y) - 90;
+
 	for _, b := range this.Boxes {
 		clr := color.RGBA{0, 0, 0, 255}
 		if b.Type == Ground {
@@ -275,14 +301,12 @@ func (this *Collider) Draw(screen *ebiten.Image) {
 			clr = color.RGBA{255, 0, 0, 2}
 		} else if b.Type == Platform {
 			clr = color.RGBA{0, 255, 0, 2}
-		} else if b.Type == Edge {
-			clr = color.RGBA{255, 0, 255, 2}
 		}
 
 		vector.DrawFilledRect(
 			screen,
-			float32(b.Rect.X),
-			float32(b.Rect.Y),
+			float32(b.Rect.X + this.X) - Xshift,
+			float32(b.Rect.Y + this.Y) - Yshift,
 			float32(b.Rect.Width),
 			float32(b.Rect.Height),
 			clr,
@@ -291,6 +315,6 @@ func (this *Collider) Draw(screen *ebiten.Image) {
 	}
 
 	for _, b := range this.playerBoxes {
-		b.Draw(screen)
+		b.Draw(screen, -Xshift, -Yshift)
 	}
 }

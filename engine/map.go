@@ -52,7 +52,7 @@ func NewTilemap(mapPath, tilesetPath string, x, y int) *Tilemap {
 
     for _, tile := range tilesIndex {
 		if tile != -1 {
-			sx, sy := ((tile % 12) * 8), (tile / 12) * 8
+			sx, sy := ((tile % 15) * 8), (tile / 15) * 8
             gmap.tiles = append(gmap.tiles, gmap.tileset.SubImage(image.Rect(sx, sy, sx+8, sy+8)).(*ebiten.Image))
 		} else {
             gmap.tiles = append(gmap.tiles, nil)

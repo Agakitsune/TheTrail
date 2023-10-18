@@ -67,6 +67,10 @@ func (this *Animator) SetAnimation(name string) {
 	anim.Selection = 0
 }
 
+func (this *Animator) OnLastFrame() bool {
+	return this.Animations[this.Current].Selection == len(this.Animations[this.Current].Frames)-1
+}
+
 func (this *Animator) Update(sprite *MultiSprite) {
 	var anim = this.Animations[this.Current]
 	anim.Update(sprite)

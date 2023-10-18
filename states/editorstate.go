@@ -39,6 +39,8 @@ type EditorState struct {
 func (s *EditorState) Load(g *engine.Game) {
 	s.game = g
 
+	s.game.Init()
+
 	s.currentChoice = 0
 	s.heads = []*ebiten.Image{
 		engine.LoadImage("./assets/dood/head_one.png"),
@@ -78,6 +80,9 @@ func (s *EditorState) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		fmt.Println("EditorState Update")
 		s.game.SetState(&WorldMapState{})
+		s.game.Dood.Sprites = append(s.game.Dood.Sprites, s.heads[s.indexH])
+		s.game.Dood.Sprites = append(s.game.Dood.Sprites, s.torso[s.indexT])
+		s.game.Dood.Sprites = append(s.game.Dood.Sprites, s.boots[s.indexB])
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
 		if s.currentChoice == 0 {
@@ -96,21 +101,21 @@ func (s *EditorState) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
 		if s.currentChoice == 0 {
 			if s.indexH == 0 {
-				s.indexH = 2
+				s.indexH = len(s.heads) - 1
 			} else {
 				s.indexH--
 			}
 		}
 		if s.currentChoice == 1 {
 			if s.indexT == 0 {
-				s.indexT = 2
+				s.indexT = len(s.torso) - 1
 			} else {
 				s.indexT--
 			}
 		}
 		if s.currentChoice == 2 {
 			if s.indexB == 0 {
-				s.indexB = 2
+				s.indexB = len(s.boots) - 1
 			} else {
 				s.indexB--
 			}
@@ -118,21 +123,21 @@ func (s *EditorState) Update() error {
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
 		if s.currentChoice == 0 {
-			if s.indexH == 2 {
+			if s.indexH == len(s.heads)-1 {
 				s.indexH = 0
 			} else {
 				s.indexH++
 			}
 		}
 		if s.currentChoice == 1 {
-			if s.indexT == 2 {
+			if s.indexT == len(s.torso)-1 {
 				s.indexT = 0
 			} else {
 				s.indexT++
 			}
 		}
 		if s.currentChoice == 2 {
-			if s.indexB == 2 {
+			if s.indexB == len(s.boots)-1 {
 				s.indexB = 0
 			} else {
 				s.indexB++

@@ -33,6 +33,12 @@ type MultiSprite struct {
 	TrySlowFall bool
 	SlowFall bool
 	Dir int
+
+	Falltrough bool
+
+	Dead bool
+
+	Win bool
 }
 
 func NewSprite(

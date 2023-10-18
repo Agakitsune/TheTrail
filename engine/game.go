@@ -25,6 +25,7 @@ type Game struct {
 
 	Collider []*Collider
 	Tilemap  []*Tilemap
+	Front  []*Tilemap
 
 	Scene *SceneTrigger
 
@@ -44,6 +45,8 @@ type Game struct {
 	Music *Audio
 
 	state State
+
+	Background *ebiten.Image
 }
 
 func (g *Game) SetState(state State) {
@@ -52,30 +55,32 @@ func (g *Game) SetState(state State) {
 }
 
 func (g *Game) Init() {
-	g.Collider = make([]*Collider, 0)
-	g.Collider = append(g.Collider, NewColliderMap("./assets/new_collision.csv", 0, 0))
-	g.Collider = append(g.Collider, NewColliderMap("./assets/next_collide.csv", 320, 0))
+	// g.Collider = make([]*Collider, 0)
+	// g.Collider = append(g.Collider, NewColliderMap("./assets/new_collision.csv", 0, 0))
+	// g.Collider = append(g.Collider, NewColliderMap("./assets/next_collide.csv", 320, 0))
 
-	g.Tilemap = make([]*Tilemap, 0)
-	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/new_draw.csv", "./assets/grass.png", 0, 0))
-	g.Tilemap = append(g.Tilemap, NewTilemap("./assets/next_draw.csv", "./assets/tileset.png", 320, 0))
+	// g.Tilemap = make([]*Tilemap, 0)
+	// g.Tilemap = append(g.Tilemap, NewTilemap("./assets/new_draw.csv", "./assets/grass.png", 0, 0))
+	// g.Tilemap = append(g.Tilemap, NewTilemap("./assets/next_draw.csv", "./assets/tileset.png", 320, 0))
 
 	g.Scene = NewSceneTrigger(320, 180)
 
 	g.Cam = camera.NewCamera(320, 180, 160, 90, 0, 1)
 
+	g.Background = LoadImage("./assets/back.png")
+
 	g.Dood = NewSprite(
 		[]string{
-			"./assets/dood/boots_one.png",
-			"./assets/dood/torso_three.png",
-			"./assets/dood/head_two.png",
+			// "./assets/dood/boots_one.png",
+			// "./assets/dood/torso_three.png",
+			// "./assets/dood/head_two.png",
 		},
 		image.Rect(0, 0, 32, 32),
 		Vector2{1, 1},
 	)
 
 	g.Dood.X = 32
-	g.Dood.Y = 32
+	g.Dood.Y = 128
 
 	g.Dood.Jump = false
 	g.Dood.Airborne = false
@@ -116,6 +121,20 @@ func (g *Game) Init() {
 				LoopOn:    0,
 				Selection: 0,
 				Speed:     1,
+			},
+			"death": &Animation{
+				Frames:    []int{0, 1, 2, 3, 4, 5, 6, 7, 8},
+				Row:       5,
+				LoopOn:    8,
+				Selection: 0,
+				Speed:     4,
+			},
+			"spawn": &Animation{
+				Frames:    []int{7, 6, 5, 4, 3, 2, 1, 0, 8},
+				Row:       5,
+				LoopOn:    8,
+				Selection: 0,
+				Speed:     4,
 			},
 		},
 		Current: "idle",
