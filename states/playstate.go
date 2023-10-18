@@ -48,6 +48,20 @@ func (s *PlayState) Load(g *engine.Game) {
 	// s.game.Dood.X = 8
 	// s.game.Dood.Y = 87 * 8
 
+	g.Dood.X = 32
+	g.Dood.Y = 128
+
+	s.game.Cam.SetPosition(160, 90)
+
+	s.game.SceneX = 0
+	s.game.SceneY = 0
+
+	s.game.Scene.ShiftX = 0
+	s.game.Scene.ShiftY = 0
+
+	s.game.Dood.Win = false
+	s.win = false
+
 	// s.game.Init()
 	s.music = engine.CreateAudio("assets/EpitechGameJam-_In_Game.ogg")
 	s.music.Play()
